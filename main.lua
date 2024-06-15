@@ -30,7 +30,11 @@ function love.keypressed(key, scancode, isrepeat)
 	end
 
 	if key =='q' then
-		setVolGlobal(music, 0.3)
+		setVolNormal(playingMusic[1], 0.5)
+	end
+
+	if key =='w' then
+		setVolNormal(playingMusic[1], 1.0)
 	end
 
 	if key == 'a' then

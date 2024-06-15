@@ -3,20 +3,37 @@ local temp = {}
 temp.attack1 = love.audio.newSource('sfx/attack1.wav', 'static')
 temp.attack2 = love.audio.newSource('sfx/attack2.wav', 'static')
 
-function setVolGlobal(audioGroup, amount)
+function setVolGlobal(audioGroup, amount, override)
+	--uses full audio group
 	if audioGroup == music then
-		settings.musGlobalVol = amount
+		settings.volume.music = amount
 	elseif audioGroup == sfx then
-		settings.musGlobalVol = amount
+		settings.volume.sfx = amount
 	else
 		print('[setVolGlobal]Unknown audio type')
 	end
 
+	if override == true then
+		for i, audio in pairs(audioGroup) do
+			--does not take into account modifiers,
+			--direct value modification
+			audio:setVolume(amount)
+		end
+	end
+end
 
-	for i, audio in pairs(audioGroup) do
-		--does not take into account modifiers,
-		--direct value modification
-		audio:setVolume(amount)
+function setVolNormal(audio, amount)
+	--uses individual audio sources
+	if audio == nil then
+		--exit if audio doesn't exist
+		return
+	end
+	if audio:getType() == 'stream' then
+		audio:setVolume(settings.volume.music*amount)
+	elseif audio:getType() == 'static' then
+		audio:setVolume(settings.volume.sfx*amount)
+	else
+		print('[setVolNormal]Unknown audio type')
 	end
 end
 

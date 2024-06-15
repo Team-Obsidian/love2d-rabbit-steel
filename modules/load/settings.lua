@@ -1,6 +1,6 @@
-temp = {}
+temp = {volume={}}
 
-temp.musGlobalVol = 0.5
-temp.sfxGlobalVol = 0.8
+temp.volume.music = 0.2
+temp.volume.sfx = 0.8
 
 return temp
