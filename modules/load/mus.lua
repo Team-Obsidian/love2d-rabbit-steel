@@ -4,6 +4,8 @@ local temp = {}
 
 temp.battle1 = love.audio.newSource('mus/fate-battle1.mp3', 'stream')
 temp.web1 = love.audio.newSource('mus/loveweb3.mp3', 'stream')
+temp.explore1 = love.audio.newSource('mus/etrian-labyrinth.mp3', 'stream')
+
 
 playingMusic = {}
 function playMusic(audio, behavior)

@@ -4,6 +4,22 @@
 		"selected_items":
 		[
 			[
+				"displayt",
+				"displayText2"
+			],
+			[
+				"print",
+				"love.graphics.print"
+			],
+			[
+				"newf",
+				"love.graphics.newFont"
+			],
+			[
+				"soun",
+				"love.sound.newSoundData"
+			],
+			[
 				"co",
 				"love.graphics.setColor"
 			],
@@ -136,7 +152,7 @@
 	},
 	"console":
 	{
-		"height": 0.0,
+		"height": 226.0,
 		"history":
 		[
 		]
@@ -150,12 +166,14 @@
 		"side_bar_visible": false,
 		"status_bar_visible": false
 	},
-	"expanded_folders":
-	[
-		"/C/Users/mini/Documents/GitHub/love2d-rabbit-steel"
-	],
 	"file_history":
 	[
+		"/C/Users/mini/Documents/GitHub/love2d-rabbit-steel/main.lua",
+		"/C/Users/mini/Documents/GitHub/love2d-rabbit-steel/modules/load/settings.lua",
+		"/C/Users/mini/Documents/GitHub/love2d-rabbit-steel/modules/load/sfx.lua",
+		"/C/Users/mini/Documents/GitHub/love2d-rabbit-steel/modules/load/mus.lua",
+		"/C/Users/mini/Documents/GitHub/love2d-rabbit-steel/mus/loadMus.lua",
+		"/C/Users/mini/Documents/GitHub/love2D-project/modules/animate.lua",
 		"/C/Users/mini/Documents/GitHub/love2D-project/modules/camera.lua",
 		"/C/Users/mini/Documents/GitHub/love2D-project/design-ideas/ideas.md",
 		"/C/Users/mini/Documents/GitHub/love2D-project/modules/make.lua",
@@ -163,7 +181,6 @@
 		"/C/Users/mini/AppData/Roaming/Sublime Text/Packages/User/SublimeTextTrans.sublime-settings",
 		"/C/Users/mini/Documents/GitHub/love2D-project/main.lua",
 		"/C/Users/mini/Documents/GitHub/love2D-project/modules/gravity.lua",
-		"/C/Users/mini/Documents/GitHub/love2D-project/modules/animate.lua",
 		"/C/Users/mini/Documents/GitHub/love2D-project/modules/collision.lua",
 		"/C/Users/mini/Documents/GitHub/love2D-project/sprite-4.png",
 		"/C/Users/mini/Documents/GitHub/love2D-project/collision.lua",
@@ -172,7 +189,7 @@
 	],
 	"find":
 	{
-		"height": 46.0
+		"height": 43.0
 	},
 	"find_in_files":
 	{
@@ -186,6 +203,8 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"volumeSettings",
+			"volumeSettings("
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -212,7 +231,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 46.0
+		"height": 43.0
 	},
 	"input":
 	{
@@ -240,10 +259,10 @@
 			1.0
 		]
 	},
-	"menu_visible": true,
+	"menu_visible": false,
 	"output.exec":
 	{
-		"height": 91.0
+		"height": 159.0
 	},
 	"output.find_results":
 	{
@@ -253,7 +272,7 @@
 	"project": "rabbit-and-steel.sublime-project",
 	"replace":
 	{
-		"height": 88.0
+		"height": 82.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -273,7 +292,7 @@
 		[
 			[
 				"",
-				"C:\\Users\\mini\\Documents\\GitHub\\love2d-touhou\\touhou.sublime-project"
+				"C:\\Users\\mini\\Documents\\GitHub\\love2D-project\\project-file.sublime-project"
 			]
 		],
 		"width": 380.0
