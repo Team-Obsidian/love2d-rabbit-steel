@@ -1,0 +1,1 @@
+[1] https://stackoverflow.com/questions/12394841/safely-remove-items-from-an-array-table-while-iterating

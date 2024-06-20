@@ -10,7 +10,7 @@ temp.explore1 = love.audio.newSource('mus/etrian-labyrinth.mp3', 'stream')
 playingMusic = {}
 function playMusic(audio, behavior)
 	-- Check for sounds to see if they're already playing
-
+	audio:setVolume(settings.volume.music)
 	--default behavior
 	if behavior == 'cut' or behavior == nil then
 		local alreadyExists = false

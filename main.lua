@@ -7,6 +7,14 @@ function love.load()
 	sfx = require('modules/load/sfx')
 	settings = require('modules/load/settings')
 
+	require('modules/events')
+	require('modules/graphics')
+	require('modules/generate')
+
+	require('modules/attacks')
+
+
+	currentTime = 0	
 	meiryoub = love.graphics.newFont('meiryoub.ttf', 36)
 
 end
@@ -14,33 +22,60 @@ end
 function love.update(dTime)
 	currentTime = love.timer.getTime()
 
-	print('time is: '.. tostring(math.floor(love.timer.getTime()*100))/100)
+
+	for i, player in pairs(playerList) do
+		local vectorX = 0
+		local vectorY = 0
+		--print('player.id: '..player.id)
+		if player.id == 1 then
+			--adjust for controllers in future
+
+			--if holding opposite sides, cancel out
+			if love.keyboard.isDown('left') then
+				vectorX = vectorX - 1
+			end
+			if love.keyboard.isDown('right') then
+				vectorX = vectorX + 1
+			end
+			if love.keyboard.isDown('up') then
+				vectorY = vectorY - 1
+			end
+			if love.keyboard.isDown('down') then
+				vectorY = vectorY + 1
+			end
+		elseif player.id == 2 then
+		elseif player.id == 3 then
+		elseif player.id == 4 then
+		end
+
+		--movement code, diagonals move slower, radial movement
+		--very possible to preserve sign more efficiently, todo
+
+		if vectorX == vectorY and vectorX > 0 then 
+			vectorX = 1/math.sqrt(2)
+			vectorY = 1/math.sqrt(2)
+		elseif vectorX == vectorY and vectorX < 0 then
+			vectorX = -1/math.sqrt(2)
+			vectorY = -1/math.sqrt(2)
+		end
+
+		player.xPos = player.xPos + player.speed*vectorX*dTime
+		player.yPos = player.yPos + player.speed*vectorY*dTime
+
+	end
 
 end
 
 function love.draw()
 
-	--love.graphics.scale(3, 3)
-	local displayText1 = tostring(math.floor(currentTime / 60))
-	local displayText2 = tostring(math.floor(currentTime % 60))
-	if tonumber(displayText1) < 10 then 
-		displayText1 = '0' .. displayText1..'\''
-	else
-		displayText2 = displayText2 .. '\"'
+	displayTimer(true)
+
+	for i, player in pairs(playerList) do
+		love.graphics.setColor(1, 1, 0.5, 1)
+		love.graphics.circle('fill', player.xPos, player.yPos, player.radius)
+		--love.graphics.draw(
+		--drawable, player.xPos, player.yPos, player.rotate, sx, sy, ox, oy, kx, ky)
 	end
-	if tonumber(displayText2) < 10 then 
-		displayText2 = '0' .. displayText2.. '\"'
-	else
-		displayText2 = displayText2 .. '\"'
-	end
-
-	love.graphics.print( 
-		displayText1 ..
-		displayText2 ..
-		tostring(math.floor((currentTime - math.floor(currentTime))*100))
-		,meiryoub,0,0)
-
-
 
 end
 
@@ -69,4 +104,17 @@ function love.keypressed(key, scancode, isrepeat)
 	if key == 'd' then
 		playMusic(music.explore1, 'cut')
 	end
+
+	if key == 'j' then
+
+	end
+
+	if key == 'k' then
+
+	end
+
+	if key == 'l' then
+
+	end
+
 end
