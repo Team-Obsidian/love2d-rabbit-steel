@@ -39,11 +39,17 @@ end
 function playerAttack1(b)
 	local a = {}
 	a.shape = b.shape or 'circle'
-	a.xPos = b.startPosX or winX/2
-	a.yPos = b.startPosY or winY/2
-	a.radius = b.radius or 50
+	a.xPos = b.xPos or winX/2
+	a.yPos = b.yPos or winY/2
+	a.radius = b.radius or 80
 	a.damage = b.damage or 50
-	a.duration = b.duration or 5
+	a.duration = b.duration or 0.3
+
+	a.owner = 'player'
+	a.id = b.id
+
+	playerList[a.id].globalCD = 0.5
+	playerList[a.id].primaryCD = 0.5
 
 	table.insert(attackList,a)
 	playSound(sfx.attack2, 'cut')

@@ -1,11 +1,12 @@
 playerList = {}
+enemyList = {}
 
 function genPlayer(b)
 	local a = {}
 
 	a.xPos = b.xPos or winX/2
 	a.yPos = b.yPos or winY/2
-	a.radius = b.radius or 16
+	a.radius = b.radius or 4
 
 	--effects
     a.rotate = b.rotate or 0
@@ -15,7 +16,11 @@ function genPlayer(b)
 
     --battle attributes
     a.hitable = b.hitable or true
-    a.speed = 300
+    a.hitTimerMax = b.hitTimerMax or 3
+    a.hitTimer = b.hitTimerMax or 0
+    a.hitTimerRate = b.hitTimerRate or 1
+
+    a.speed = 200
     a.facing = 'right'
     a.target = 0
 
@@ -26,6 +31,9 @@ function genPlayer(b)
     a.specialCD = 0
     a.defensiveCD = 0
 
+
+    a.maxHealth = 5
+    a.health = a.maxHealth
 
     --arbitrary 4 player limit
     for i=1,4 do
@@ -43,6 +51,42 @@ function genPlayer(b)
 end
 genPlayer{}
 
+function genEnemy(b)
+    local a = {}
+
+    a.xPos = b.xPos or winX*2/3
+    a.yPos = b.yPos or winY/2
+    a.radius = b.radius or 100
+
+    --effects
+    a.rotate = b.rotate or 0
+    a.skewX = b.skewX or 0
+    a.skewY = b.skewY or 0
+    a.opacity = b.opacity or 1
+
+    --a.speed = 200
+    a.facing = 'right'
+    --a.target = 0
+
+
+    a.health = 500
+    a.maxHealth = a.health
+
+    --arbitrary 8 enemy limit
+    for i=1,8 do
+        if enemyList[i] == nil then
+            a.id = i
+            break
+        end
+    end
+
+    -- auto-insert into table
+    if a.id == nil then print('trying to add more then 8 enemies') else 
+        table.insert(enemyList, a.id, a)
+    end
+
+end
+genEnemy{}
 
 
 --[[
