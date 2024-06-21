@@ -17,13 +17,53 @@ function love.load()
 	currentTime = 0	
 	meiryoub = love.graphics.newFont('meiryoub.ttf', 36)
 
+    function collideCircle(object1, object2) 
+        local something = (object2.xPos - object1.xPos)^2 + (object2.yPos - object1.yPos)^2
+        --print(math.sqrt(something))
+        return (object1.radius + object2.radius > math.sqrt(something))
+    end
+
+
 end
 
 function love.update(dTime)
-	currentTime = love.timer.getTime()
+	--currentTime = love.timer.getTime()
+	currentTime = currentTime + dTime
 
 
+	for i, attack in pairs(attackList) do
+		if attack.duration < 0 then
+			table.insert(remAttack, i)
+		else
+			--assumes enemy hitbox for now
+			if attack.shape == 'circle' then
+				for i, player in pairs(playerList) do
+					--check circular collision
+					if collideCircle(player, attack) and player.hitable then
+						--player is hit!
+						player.hitable = false
+						--insert timer here
+						print('hit')
+					end
+				end
+			end
+
+			attack.duration = attack.duration - dTime
+		end
+	end
+
+	for i, entry in pairs(remAttack) do
+		attackList[entry] = nil
+	end
+	remAttack = {}
+
+
+
+	--movement
 	for i, player in pairs(playerList) do
+
+
+		--movement
 		local vectorX = 0
 		local vectorY = 0
 		--print('player.id: '..player.id)
@@ -67,7 +107,8 @@ function love.update(dTime)
 end
 
 function love.draw()
-
+	love.graphics.push()
+	love.graphics.scale(winScale, winScale)
 	displayTimer(true)
 
 	for i, player in pairs(playerList) do
@@ -77,6 +118,14 @@ function love.draw()
 		--drawable, player.xPos, player.yPos, player.rotate, sx, sy, ox, oy, kx, ky)
 	end
 
+	--temporary before graphics
+	for i, attack in pairs(attackList) do
+		love.graphics.setColor(0.5, 1,1, 0.5)
+		love.graphics.circle('fill', attack.xPos, attack.yPos, attack.radius)
+	end
+
+	love.graphics.pop()
+
 end
 
 function love.keypressed(key, scancode, isrepeat)
@@ -84,7 +133,7 @@ function love.keypressed(key, scancode, isrepeat)
 		playSound(sfx.attack1, 'cut')
 	end
 	if key == 'x' then
-		playSound(sfx.attack2, 'cut')
+
 	end
 
 	if key =='q' then
@@ -114,7 +163,7 @@ function love.keypressed(key, scancode, isrepeat)
 	end
 
 	if key == 'l' then
-
+		playerAttack1{}
 	end
 
 end

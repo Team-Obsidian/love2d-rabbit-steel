@@ -1,7 +1,10 @@
 eventList = {}
 remEvent = {}
 
+graphicList = {}
+remGraphic = {}
 
+--[[
 function genEvent(e)
 	local temp = {}
 	temp.type = e.type or 'generic'
@@ -11,14 +14,21 @@ function genEvent(e)
 	return temp
 end
 
+
+--]]
+
+function chooseAttack(event)
+	if event.attack == 'attack1' then
+		playerAttack1(event)
+		playerGraphic1(event)
+	end
+end
+
 function checkEvents()
 	for i, event in pairs(eventList) do
-		if event.startT > currentTime then
-			if event.endT < currentTime then
-				--do action
-			elseif event.endT >= currentTime then
-				--remove from event list *[1]
-			end
+		if currentTime >= event.time then
+			table.insert(remEvent, i)
+			chooseAttack(event)
 		end
 	end
 end

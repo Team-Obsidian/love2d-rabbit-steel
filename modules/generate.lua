@@ -43,9 +43,18 @@ function genPlayer(b)
 end
 genPlayer{}
 
-function playerAttack1()
 
-end
+
+--[[
+if enemy.moving:
+            enemy.moveTime+= 1
+            if enemy.movingType == 'logistic':
+                enemy.centerX = (-1/(1+math.e**(-5+enemy.moveTime/enemy.moveTimeMax*10))+1) * (enemy.toX-enemy.initialX) + enemy.initialX
+                enemy.centerY = (-1/(1+math.e**(-5+enemy.moveTime/enemy.moveTimeMax*10))+1) * (enemy.toY-enemy.initialY) + enemy.initialY
+            if enemy.moveTime == enemy.moveTimeMax:
+                enemy.moving = False
+            pass 
+--]]
 
 
 
