@@ -16,7 +16,7 @@ function genPlayer(b)
 
     --battle attributes
     a.hitable = b.hitable or true
-    a.hitTimerMax = b.hitTimerMax or 3
+    a.hitTimerMax = b.hitTimerMax or 1.5
     a.hitTimer = b.hitTimerMax or 0
     a.hitTimerRate = b.hitTimerRate or 1
 

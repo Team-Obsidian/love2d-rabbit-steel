@@ -3,6 +3,7 @@ io.stdout:setvbuf("no")
 
 
 function love.load()
+
 	music = require('modules/load/mus')
 	sfx = require('modules/load/sfx')
 	settings = require('modules/load/settings')
@@ -14,13 +15,23 @@ function love.load()
 	require('modules/attacks')
 
 
-	currentTime = 0	
+	currentTime = 0
+	arrow = love.graphics.newImage('img/arrow.png')
+	arrow2 = love.graphics.newImage('img/arrow2.png')
 	meiryoub = love.graphics.newFont('meiryoub.ttf', 36)
 
     function collideCircle(object1, object2) 
         local something = (object2.xPos - object1.xPos)^2 + (object2.yPos - object1.yPos)^2
         --print(math.sqrt(something))
         return (object1.radius + object2.radius > math.sqrt(something))
+    end
+
+    function turnPlayerAround(player, enemy)
+    	--bias toward facing right
+    	if enemy ~= nil then
+	    	if player.xPos > enemy.xPos then player.facing = 'left'
+	       	elseif player.xPos <= enemy.xPos then player.facing = 'right' end
+	    end
     end
 
 
@@ -30,13 +41,13 @@ function love.update(dTime)
 	--currentTime = love.timer.getTime()
 	currentTime = currentTime + dTime
 
+	checkAttacks(dTime)
 
 
 
 	for i, attack in pairs(attackList) do
-		if attack.duration < 0 then
-			table.insert(remAttack, i)
-		else
+		-- (don't double remove from list, let checkAttacks handle it)
+		if attack.duration > 0 then
 			--assumes enemy hitbox for now
 			if attack.shape == 'circle' then
 				if attack.owner == 'enemy' then
@@ -64,7 +75,6 @@ function love.update(dTime)
 							if enemy.health <= 0 then
 								print('Enemy '..tostring(enemy.id)..' has been defeated.')
 								enemyList[i] = nil
-								--table.remove(enemyList, i)
 							end
 
 						end
@@ -76,10 +86,6 @@ function love.update(dTime)
 		end
 	end
 
-	for i, entry in pairs(remAttack) do
-		attackList[entry] = nil
-	end
-	remAttack = {}
 
 
 
@@ -113,6 +119,30 @@ function love.update(dTime)
 			player.defensiveCD = 0
 		end
 
+		if player.hitTimer > 0 then
+			player.hitTimer = player.hitTimer - player.hitTimerRate*dTime
+			player.hitable = false
+			--constantly setting hitable to false, may want to remove in future
+		elseif player.hitTimer < 0 then
+			player.hitTimer = 0
+			player.hitable = true
+		else
+			--do nothing, hit timer is zero
+		end
+
+		--if player's enemy is defeated, redirect to lowest id
+		-- (in the real game, retargets to nearest enemy in probably every second)
+		if enemyList ~= nil and enemyList[player.target] == nil then
+			for i, enemy in pairs(enemyList) do
+				if enemy ~= nil then
+					player.target = i
+					break
+				end
+			end
+		end
+
+
+
 		--movement
 		local vectorX = 0
 		local vectorY = 0
@@ -120,7 +150,12 @@ function love.update(dTime)
 		if player.id == 1 then
 			--adjust for controllers in future
 			if love.keyboard.isDown('z') and player.globalCD == 0 and player.primaryCD == 0 then
+				turnPlayerAround(player, enemyList[player.target])
 				playerAttack1{xPos=player.xPos,yPos=player.yPos,id=1}
+			end
+			if love.keyboard.isDown('x') and player.globalCD == 0 and player.primaryCD == 0 then
+				turnPlayerAround(player, enemyList[player.target])
+				playerAttack2{id=1}
 			end
 			--if holding opposite sides, cancel out
 			if love.keyboard.isDown('left') then
@@ -151,6 +186,25 @@ function love.update(dTime)
 			vectorY = -1/math.sqrt(2)
 		end
 
+		--bounds are currently hardcoded to window, 
+		--should make it dynamic, like rabbit and steel.
+		if player.xPos + player.speed*vectorX*dTime > winX then
+			player.xPos = winX
+			vectorX = 0
+		end
+		if player.xPos + player.speed*vectorX*dTime < 0 then
+			player.xPos = 0
+			vectorX = 0
+		end
+		if player.yPos + player.speed*vectorY*dTime > winY then
+			player.yPos = winY
+			vectorY = 0
+		end
+		if player.yPos + player.speed*vectorY*dTime < 0 then
+			player.yPos = 0
+			vectorY = 0
+		end
+
 		player.xPos = player.xPos + player.speed*vectorX*dTime
 		player.yPos = player.yPos + player.speed*vectorY*dTime
 
@@ -165,12 +219,32 @@ function love.draw()
 
 
 	for i, player in pairs(playerList) do
-		love.graphics.setColor(1, 1, 0.5, 1)
+		--tempOpacity
+		local tempOpacity = 1
+		if player.hitable == false then
+			tempOpacity = 0.5
+		end
+		love.graphics.setColor(1, 1, 0.5, tempOpacity)
 		love.graphics.circle('fill', player.xPos, player.yPos, player.radius)
-		love.graphics.setColor(1, 1, 0.5, 0.2)
+		love.graphics.setColor(1, 1, 0.5, tempOpacity*0.2)
 		love.graphics.circle('fill', player.xPos, player.yPos, 5*player.radius)
-		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.setColor(1, 1, 1, tempOpacity)
 		love.graphics.circle('line', player.xPos, player.yPos, 5*player.radius)
+
+		local arrowOffX = 36
+		local facingSide = 1
+		if player.facing == 'right' then
+			facingSide = 1
+		elseif player.facing == 'left' then
+			facingSide = -1
+		end
+		love.graphics.draw(arrow, player.xPos + arrowOffX*facingSide, player.yPos, 0, facingSide, 1, 
+			arrow:getWidth()/2, arrow:getHeight()/2)
+
+
+
+
+
 		--love.graphics.draw(
 		--drawable, player.xPos, player.yPos, player.rotate, sx, sy, ox, oy, kx, ky)
 	end
@@ -190,10 +264,19 @@ function love.draw()
 
 	--temporary before graphics
 	for i, attack in pairs(attackList) do
-		love.graphics.setColor(0.5, 1,1, 0.3)
-		love.graphics.circle('fill', attack.xPos, attack.yPos, attack.radius)
-		love.graphics.setColor(1, 1,1, 0.8)
-		love.graphics.circle('line', attack.xPos, attack.yPos, attack.radius)
+		if attack.shape == 'circle' then
+			if attack.owner == 'player' then
+				love.graphics.setColor(0.5, 1,1, 0.3)
+				love.graphics.circle('fill', attack.xPos, attack.yPos, attack.radius)
+				love.graphics.setColor(1, 1,1, 0.8)
+				love.graphics.circle('line', attack.xPos, attack.yPos, attack.radius)
+			elseif attack.owner == 'enemy' then
+				love.graphics.setColor(1, 0.5,0.5, 0.3)
+				love.graphics.circle('fill', attack.xPos, attack.yPos, attack.radius)
+				love.graphics.setColor(1, 0.5,0.5, 0.8)
+				love.graphics.circle('line', attack.xPos, attack.yPos, attack.radius)				
+			end
+		end
 	end
 
 	love.graphics.pop()
@@ -235,7 +318,14 @@ function love.keypressed(key, scancode, isrepeat)
 	end
 
 	if key == 'l' then
-
+		--hardcoding, randomize target later
+		genAttack('enemyAtk1', 1.5, {
+			id=1,
+			xPos=playerList[1].xPos,
+			yPos=playerList[1].yPos,
+			shape='circle',
+			duration = 3
+		})
 	end
 
 end
