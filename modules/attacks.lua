@@ -1,39 +1,9 @@
---hello
---[[
-function queueAttack(b)
-	local a = {}
-	a.attack = b.attack
-	--wizard primary, sends object from player to enemy / projectiles
-	--start position required, used if non
-	a.startPosX = b.startPosX
-	a.startPosY = b.startPosY
-	--can't decide between nil or equal to startPos, todo
-	a.endPosX = b.endPosX or a.startPosX
-	a.endPosY = b.endPosY or a.startPosY
-
-	--set end time exact, according to ingame timer
-	--happens in ___ seconds
-	a.time = currentTime + b.time or currentTime + 1
-
-	table.insert(eventList,a)
-end
-
-function queueGraphic(b)
-	local a = {}
-	a.graphic = b.graphic
-
-	a.startPosX = b.startPosX
-	a.startPosY = b.startPosY
-	a.endPosX = b.endPosX or a.startPosX
-	a.endPosY = b.endPosY or a.startPosY
-
-
-	a.delay = b.delay or 1
-	a.duration = b.duration or 1
-
-	--table.insert(attackList,a)
-end
---]]
+-- aoeAttacks for stuff like crow bullets and wolf screen side
+-- (has duration, shape is circle or side(i.e. wolf angle attack))
+aoeAttacks = {}
+-- bulletAttacks for streams of bullets like ____
+-- (has angle, no duration, erased outside of screen boundaries)
+bulletAttacks = {}
 
 function playerAttack1(b)
 	local a = {}
@@ -42,7 +12,7 @@ function playerAttack1(b)
 	a.yPos = b.yPos or winY/2
 	a.radius = b.radius or 80
 	a.damage = b.damage or 50
-	a.duration = b.duration or 0.3
+	a.duration = b.duration or 0.1
 
 	a.owner = 'player'
 	a.id = b.id
@@ -50,7 +20,7 @@ function playerAttack1(b)
 	playerList[a.id].globalCD = 1
 	playerList[a.id].primaryCD = 1
  
-	table.insert(attackList,a)
+	table.insert(aoeAttacks,a)
 	playSound(sfx.attack1, 'cut')
 end
 
@@ -67,7 +37,7 @@ function playerAttack2(b)
 	end
 	a.radius = b.radius or 40
 	a.damage = b.damage or 40
-	a.duration = b.duration or 0.3
+	a.duration = b.duration or 0.1
 
 	a.owner = 'player'
 
@@ -75,7 +45,7 @@ function playerAttack2(b)
 	playerList[a.id].globalCD = 1.2
 	playerList[a.id].primaryCD = 1.2
  
-	table.insert(attackList,a)
+	table.insert(aoeAttacks,a)
 	playSound(sfx.attack2, 'cut')
 end
 
@@ -85,36 +55,48 @@ function enemyAttack1(b)
 	a.xPos = b.xPos or winX/2
 	a.yPos = b.yPos or winY/2
 	a.radius = b.radius or 80
-	a.damage = b.damage or 50
+	--a.damage = b.damage or 50
 	a.duration = b.duration or 1
 
 	a.owner = 'enemy'
 	a.id = b.id
 
-	table.insert(attackList,a)
+	table.insert(aoeAttacks,a)
 	playSound(sfx.attack2, 'cut')
 end
 
-function playerPrimary(player)
-	-- non-variable stuff, only does player default
-	-- hard-coded essentially.
+function enemyAttack2(b)
+	local a = {}
+	a.shape = b.shape or 'bullet'
+	a.xPos = b.xPos
+	a.yPos = b.yPos
+	a.radius = b.radius or 10
+	--a.duration = b.duration or 1
+	a.velocity = b.velocity or 200
+	a.angle = b.angle or 0
 
-	--attacks are instant
-	queueAttack{
-		attack='attack1',
-		startPosX=player.xPos,
-		startPosY=player.yPos,
-		time=1
-	}
 
-	--graphics have duration
-	queueGraphic{
-		graphic='circle',
-		startPosX=player.xPos,
-		startPosY=player.yPos,
-		--uh,really?
-		time=0.5,
-		duration=1
-	}
-
+	--a.owner = 'enemy'
+	a.id = b.id
+	table.insert(bulletAttacks,a)
+	playSound(sfx.attack1, 'cut')
 end
+
+function initEnemyAttack2(bulletNum, b)
+	for i=1, bulletNum do
+		local interval = 0.2
+		if b == nil then
+			genAttackEvent('enemyAtk2',interval*i,{
+				xPos=0,
+				yPos=0,
+				shape='bullet',
+				owner='enemy',
+				angle=math.pi/6,
+				id=1
+			})
+		else
+			genAttackEvent('enemyAtk2',interval*i,b)			
+		end
+	end
+end
+

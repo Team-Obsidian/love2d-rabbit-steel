@@ -1,4 +1,4 @@
-wallBuffer = 1
+wallBuffer = 5
 
 function isInside(obj1,obj2)
 	if obj1.xPos > obj2.xPos and obj1.xPos + obj1.width < obj2.xPos + obj2.width

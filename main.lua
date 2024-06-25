@@ -13,6 +13,7 @@ function love.load()
 	require('modules/generate')
 
 	require('modules/attacks')
+	require('modules/misc')
 
 
 	currentTime = 0
@@ -41,83 +42,22 @@ function love.update(dTime)
 	--currentTime = love.timer.getTime()
 	currentTime = currentTime + dTime
 
-	checkAttacks(dTime)
+	checkAttackEvents(dTime)
 
 
 
-	for i, attack in pairs(attackList) do
-		-- (don't double remove from list, let checkAttacks handle it)
-		if attack.duration > 0 then
-			--assumes enemy hitbox for now
-			if attack.shape == 'circle' then
-				if attack.owner == 'enemy' then
-					for i, player in pairs(playerList) do
-						--check circular collision
-						if collideCircle(player, attack) and player.hitable then
-							--player is hit!
-							player.hitTimer = player.hitTimerMax
-							player.hitable = false
-							--insert timer here
-							print('hit: Player '..tostring(player.id))
-						end
-					end
-				elseif attack.owner == 'player' then
-					for i, enemy in pairs(enemyList) do
-						--check circular collision
-						if collideCircle(enemy, attack) then
-							--enemy is hit, duration autoset to -1 if hit (because hitbox)
-							--no lingering player bullet hitbox
-							enemy.health = enemy.health - attack.damage
-							--insert timer here
-							print('hit: Enemy '..tostring(enemy.id))
-							attack.duration = -1
+	checkAttacks(aoeAttacks, dTime)
+	checkAttacks(bulletAttacks, dTime)
 
-							if enemy.health <= 0 then
-								print('Enemy '..tostring(enemy.id)..' has been defeated.')
-								enemyList[i] = nil
-							end
-
-						end
-					end
-				end
-			end
-
-			attack.duration = attack.duration - dTime
-		end
-	end
-
+	--for loop enemyList already included
+	checkEnemyDeath()
 
 
 
 	--movement
 	for i, player in pairs(playerList) do
+		playerPassCD(player, dTime)
 
-		--check and decrease all cooldown timers
-		if player.globalCD > 0 then
-			player.globalCD = player.globalCD - dTime
-		elseif player.globalCD < 0 then
-			player.globalCD = 0
-		end
-		if player.primaryCD > 0 then
-			player.primaryCD = player.primaryCD - dTime
-		elseif player.primaryCD < 0 then
-			player.primaryCD = 0
-		end
-		if player.secondaryCD > 0 then
-			player.secondaryCD = player.secondaryCD - dTime
-		elseif player.secondaryCD < 0 then
-			player.secondaryCD = 0
-		end
-		if player.specialCD > 0 then
-			player.specialCD = player.specialCD - dTime
-		elseif player.specialCD < 0 then
-			player.specialCD = 0
-		end
-		if player.defensiveCD > 0 then
-			player.defensiveCD = player.defensiveCD - dTime
-		elseif player.defensiveCD < 0 then
-			player.defensiveCD = 0
-		end
 
 		if player.hitTimer > 0 then
 			player.hitTimer = player.hitTimer - player.hitTimerRate*dTime
@@ -132,14 +72,10 @@ function love.update(dTime)
 
 		--if player's enemy is defeated, redirect to lowest id
 		-- (in the real game, retargets to nearest enemy in probably every second)
-		if enemyList ~= nil and enemyList[player.target] == nil then
-			for i, enemy in pairs(enemyList) do
-				if enemy ~= nil then
-					player.target = i
-					break
-				end
-			end
-		end
+		playerTarget(player)
+
+
+
 
 
 
@@ -208,6 +144,12 @@ function love.update(dTime)
 		player.xPos = player.xPos + player.speed*vectorX*dTime
 		player.yPos = player.yPos + player.speed*vectorY*dTime
 
+		tetherPhysics(player, {
+			xPos=winX/2,
+			yPos=winY/2,
+			radius=50
+		})
+
 	end
 
 end
@@ -231,7 +173,7 @@ function love.draw()
 		love.graphics.setColor(1, 1, 1, tempOpacity)
 		love.graphics.circle('line', player.xPos, player.yPos, 5*player.radius)
 
-		local arrowOffX = 36
+		local arrowOffX = 8
 		local facingSide = 1
 		if player.facing == 'right' then
 			facingSide = 1
@@ -240,6 +182,14 @@ function love.draw()
 		end
 		love.graphics.draw(arrow, player.xPos + arrowOffX*facingSide, player.yPos, 0, facingSide, 1, 
 			arrow:getWidth()/2, arrow:getHeight()/2)
+
+		local targetArrow = compassPoint(player, enemyList[player.target], 32)
+		love.graphics.draw(arrow2, 
+			player.xPos+targetArrow.xPos,
+			player.yPos+targetArrow.yPos, 
+			targetArrow.angle,1,1,
+			arrow2:getWidth()/2,arrow2:getHeight()/2
+			)
 
 
 
@@ -263,7 +213,39 @@ function love.draw()
 	end
 
 	--temporary before graphics
+	--todo: use attackList to foretell attacks and aoeAttacks or bulletAttacks only for hitbox
 	for i, attack in pairs(attackList) do
+		if attack.param.shape == 'circle' then
+			--again, these commands are the same except for setColors, can be more efficient
+			--really sketchy to hardcode this without a universal variable for all versions of this attack's radius
+			local a = attack.param.xPos
+			local b = attack.param.yPos
+			local c = attack.param.radius or 80
+			if attack.param.owner == 'player' then
+				love.graphics.setColor(0.5, 1,1, 0.3)
+				love.graphics.circle('fill', a,b,c)
+				love.graphics.setColor(1, 1,1, 0.8)
+				love.graphics.circle('line', a,b,c)
+			elseif attack.param.owner == 'enemy' then
+				--arbitrary lower opacity to fortell attack, graphics later
+				love.graphics.setColor(1, 0.5,0.5, 0.3)
+				love.graphics.circle('fill', a,b,c)
+				love.graphics.setColor(1, 0.5,0.5, 0.5)
+				love.graphics.circle('line', a,b,c)			
+			end
+			--todo, todo, todo
+		elseif attack.param.shape == 'side' then
+		elseif attack.param.shape == 'bullet' then
+			local a = attack.param.xPos
+			local b = attack.param.yPos
+			local c = attack.param.radius or 10
+			local d = attack.param.angle or 0
+			local diagonal = (math.sqrt(winX^2+winY^2))
+			love.graphics.line(a, b, math.cos(d)*diagonal + a, math.sin(d)*diagonal + b)
+		end
+	end
+
+	for i, attack in pairs(aoeAttacks) do
 		if attack.shape == 'circle' then
 			if attack.owner == 'player' then
 				love.graphics.setColor(0.5, 1,1, 0.3)
@@ -271,11 +253,35 @@ function love.draw()
 				love.graphics.setColor(1, 1,1, 0.8)
 				love.graphics.circle('line', attack.xPos, attack.yPos, attack.radius)
 			elseif attack.owner == 'enemy' then
-				love.graphics.setColor(1, 0.5,0.5, 0.3)
+				love.graphics.setColor(1, 0.5,0.5, 0.6)
 				love.graphics.circle('fill', attack.xPos, attack.yPos, attack.radius)
-				love.graphics.setColor(1, 0.5,0.5, 0.8)
+				love.graphics.setColor(1, 0.5,0.5, 1.0)
 				love.graphics.circle('line', attack.xPos, attack.yPos, attack.radius)				
 			end
+		elseif attack.shape == 'side' then
+			--todo: insert graphics for side aoe attacks here
+		end
+	end
+
+	for i, attack in pairs(bulletAttacks) do
+		--only 'bullet' shape exists, doesn't need another check
+			--print('okay')
+		--print(attack.owner)
+		love.graphics.setColor(1, 0.5,0.5, 0.3)
+		love.graphics.circle('fill', attack.xPos, attack.yPos, attack.radius)
+		if attack.owner == 'player' then
+
+			--no player attacks actually have bullets, may be unnecessary
+			love.graphics.setColor(0.5, 1,1, 0.3)
+			love.graphics.circle('fill', attack.xPos, attack.yPos, attack.radius)
+			love.graphics.setColor(1, 1,1, 0.8)
+			love.graphics.circle('line', attack.xPos, attack.yPos, attack.radius)
+		elseif attack.owner == 'enemy' then
+			print('kthen')
+			love.graphics.setColor(1, 0.5,0.5, 0.3)
+			love.graphics.circle('fill', attack.xPos, attack.yPos, attack.radius)
+			love.graphics.setColor(1, 0.5,0.5, 0.8)
+			love.graphics.circle('line', attack.xPos, attack.yPos, attack.radius)				
 		end
 	end
 
@@ -314,18 +320,24 @@ function love.keypressed(key, scancode, isrepeat)
 	end
 
 	if key == 'k' then
-
+		initEnemyAttack2(5)
 	end
 
 	if key == 'l' then
 		--hardcoding, randomize target later
-		genAttack('enemyAtk1', 1.5, {
+		genAttackEvent('enemyAtk1', 1.5, {
 			id=1,
 			xPos=playerList[1].xPos,
 			yPos=playerList[1].yPos,
 			shape='circle',
+			owner='enemy',
 			duration = 3
 		})
+	end
+
+	if key =='p' then
+		print('num of enemies: '..objNumber(enemyList))
+		--print('num of objs in bulletAttacks: ' .. tostring(objNumber(bulletAttacks)))
 	end
 
 end

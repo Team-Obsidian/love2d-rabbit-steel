@@ -87,6 +87,7 @@ function genEnemy(b)
 
 end
 genEnemy{}
+genEnemy{xPos=winX/3}
 
 
 --[[
