@@ -8,10 +8,19 @@ function compassPoint(b, c, radius)
 
 
 	a.angle = math.atan2(objTo.yPos - objFrom.yPos, objTo.xPos - objFrom.xPos)
-	a.xPos = math.cos(a.angle) * radius
-	a.yPos = math.sin(a.angle) * radius
+	a.xPos = objFrom.xPos + math.cos(a.angle) * radius
+	a.yPos = objFrom.yPos + math.sin(a.angle) * radius
 
 	return a
+end
+
+-- rotates exactly on a circle if no internal conditional is specified
+function tetherPhysics(player, a) --instantaneous teleport but that's okay I guess
+	if not collideCircle(player, a) then
+		local temp = compassPoint(a, player, a.radius)
+		player.xPos = temp.xPos
+		player.yPos = temp.yPos
+	end
 end
 
 -- square hitboxes only exist for enemy attacks, player and enemy hitboxes are always circular
@@ -110,12 +119,5 @@ function findDistance(object1, object2)
 end
 
 
--- rotates exactly on a circle if no internal conditional is specified
-function tetherPhysics(player, a) --instantaneous teleport but that's okay I guess
-	if not collideCircle(player, a) then
-		local temp = compassPoint(a, player, a.radius)
-		player.xPos = temp.xPos + winX/2
-		player.yPos = temp.yPos + winY/2
-	end
-end
+
 

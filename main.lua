@@ -22,9 +22,9 @@ function love.load()
 	meiryoub = love.graphics.newFont('meiryoub.ttf', 36)
 
     function collideCircle(object1, object2) 
-        local something = (object2.xPos - object1.xPos)^2 + (object2.yPos - object1.yPos)^2
+        local something = findDistance(object1, object2)
         --print(math.sqrt(something))
-        return (object1.radius + object2.radius > math.sqrt(something))
+        return object1.radius + object2.radius > something
     end
 
     function turnPlayerAround(player, enemy)
@@ -53,9 +53,27 @@ function love.update(dTime)
 	checkEnemyDeath()
 
 
+	local joystickTable = 	love.joystick.getJoysticks()
+	for i, joystick in ipairs(joystickTable) do
+		local alreadyExists = false
+		local joystickID = joystick:getID()
+
+		for i, player in pairs(playerList) do
+			if joystickID == player.controllerID then
+				alreadyExists = true
+			end
+		end
+
+		if alreadyExists == false then
+			print('new player generated! ID: '..joystickID)
+			genPlayer{inputDevice='controller',controllerID=joystickID, color='blue'}
+		end
+	end
+
 
 	--movement
 	for i, player in pairs(playerList) do
+		local playerID = i
 		playerPassCD(player, dTime)
 
 
@@ -82,16 +100,15 @@ function love.update(dTime)
 		--movement
 		local vectorX = 0
 		local vectorY = 0
+		local sqrt2 = math.sqrt(2)
 		--print('player.id: '..player.id)
-		if player.id == 1 then
+		if player.inputDevice == 'keyboard' then
 			--adjust for controllers in future
 			if love.keyboard.isDown('z') and player.globalCD == 0 and player.primaryCD == 0 then
-				turnPlayerAround(player, enemyList[player.target])
-				playerAttack1{xPos=player.xPos,yPos=player.yPos,id=1}
+				playerAttack1{xPos=player.xPos,yPos=player.yPos,id=playerID}
 			end
 			if love.keyboard.isDown('x') and player.globalCD == 0 and player.primaryCD == 0 then
-				turnPlayerAround(player, enemyList[player.target])
-				playerAttack2{id=1}
+				playerAttack2{id=playerID}
 			end
 			--if holding opposite sides, cancel out
 			if love.keyboard.isDown('left') then
@@ -106,20 +123,56 @@ function love.update(dTime)
 			if love.keyboard.isDown('down') then
 				vectorY = vectorY + 1
 			end
-		elseif player.id == 2 then
-		elseif player.id == 3 then
-		elseif player.id == 4 then
+
+			if math.abs(vectorX) == 1 and  math.abs(vectorY) == 1 then 
+				vectorX = 1/sqrt2 * vectorX
+				vectorY = 1/sqrt2 * vectorY
+			end
+
+		elseif player.inputDevice == 'controller' then
+			for i, joystick in ipairs(joystickTable) do
+				if joystick:getID() == player.controllerID then
+					--deadZone could be larger or smaller, multiphase too
+					local deadZoneLow = 0.3
+					local deadZoneHigh = 0.7
+					--6 axis, L2 and R2 are axis 5 and 6
+					
+					if joystick:isGamepadDown('a') and player.globalCD == 0 and player.primaryCD == 0 then
+						playerAttack1{xPos=player.xPos,yPos=player.yPos,id=playerID}
+					end
+					if joystick:isGamepadDown('b') and player.globalCD == 0 and player.primaryCD == 0 then
+						playerAttack2{id=playerID}
+					end
+
+					lstickX = joystick:getAxis(1)
+					lstickY = joystick:getAxis(2)
+					--if holding opposite sides, cancel out
+					if math.abs(lstickX) > deadZoneLow then
+						--arbitrary lower number
+						vectorX = lstickX/math.abs(lstickX)*0.6
+					end
+					if math.abs(lstickX) > deadZoneHigh then
+						vectorX = lstickX/math.abs(lstickX)
+					end
+
+					if math.abs(lstickY) > deadZoneLow then
+						vectorY = lstickY/math.abs(lstickY)*0.6
+					end
+					if math.abs(lstickY) > deadZoneHigh then
+						vectorY = lstickY/math.abs(lstickY)
+					end
+
+				end
+			end
 		end
 
 		--movement code, diagonals move slower, radial movement
 		--very possible to preserve sign more efficiently, todo
 
-		if vectorX == vectorY and vectorX > 0 then 
-			vectorX = 1/math.sqrt(2)
-			vectorY = 1/math.sqrt(2)
-		elseif vectorX == vectorY and vectorX < 0 then
-			vectorX = -1/math.sqrt(2)
-			vectorY = -1/math.sqrt(2)
+
+		if math.abs(vectorX) == 1 and  math.abs(vectorY) == 1 then 
+			vectorX = 1/sqrt2 * vectorX
+			vectorY = 1/sqrt2 * vectorY
 		end
 
 		--bounds are currently hardcoded to window, 
@@ -144,17 +197,21 @@ function love.update(dTime)
 		player.xPos = player.xPos + player.speed*vectorX*dTime
 		player.yPos = player.yPos + player.speed*vectorY*dTime
 
+--[[
 		tetherPhysics(player, {
 			xPos=winX/2,
 			yPos=winY/2,
 			radius=50
 		})
+--]]
+
 
 	end
 
 end
 
 function love.draw()
+	--print(player[1].xPos)
 	displayTimer(true)
 	love.graphics.push()
 	love.graphics.scale(winScale, winScale)
@@ -166,12 +223,22 @@ function love.draw()
 		if player.hitable == false then
 			tempOpacity = 0.5
 		end
-		love.graphics.setColor(1, 1, 0.5, tempOpacity)
-		love.graphics.circle('fill', player.xPos, player.yPos, player.radius)
-		love.graphics.setColor(1, 1, 0.5, tempOpacity*0.2)
-		love.graphics.circle('fill', player.xPos, player.yPos, 5*player.radius)
-		love.graphics.setColor(1, 1, 1, tempOpacity)
-		love.graphics.circle('line', player.xPos, player.yPos, 5*player.radius)
+
+		if player.color == 'yellow' then
+			love.graphics.setColor(1, 1, 0.5, tempOpacity)
+			love.graphics.circle('fill', player.xPos, player.yPos, player.radius)
+			love.graphics.setColor(1, 1, 0.5, tempOpacity*0.2)
+			love.graphics.circle('fill', player.xPos, player.yPos, 5*player.radius)
+			love.graphics.setColor(1, 1, 1, tempOpacity)
+			love.graphics.circle('line', player.xPos, player.yPos, 5*player.radius)
+		elseif player.color == 'blue' then
+			love.graphics.setColor(0.5, 0.5, 1, tempOpacity)
+			love.graphics.circle('fill', player.xPos, player.yPos, player.radius)
+			love.graphics.setColor(0.5, 0.5, 1, tempOpacity*0.2)
+			love.graphics.circle('fill', player.xPos, player.yPos, 5*player.radius)
+			love.graphics.setColor(1, 1, 1, tempOpacity)
+			love.graphics.circle('line', player.xPos, player.yPos, 5*player.radius)
+		end
 
 		local arrowOffX = 8
 		local facingSide = 1
@@ -185,8 +252,8 @@ function love.draw()
 
 		local targetArrow = compassPoint(player, enemyList[player.target], 32)
 		love.graphics.draw(arrow2, 
-			player.xPos+targetArrow.xPos,
-			player.yPos+targetArrow.yPos, 
+			targetArrow.xPos,
+			targetArrow.yPos, 
 			targetArrow.angle,1,1,
 			arrow2:getWidth()/2,arrow2:getHeight()/2
 			)
@@ -200,15 +267,15 @@ function love.draw()
 	end
 
 	for i, enemy in pairs(enemyList) do
+		local vertOffset = -15
 		love.graphics.setColor(1, 1, 1, 0.2)
 		love.graphics.circle('fill', enemy.xPos, enemy.yPos, enemy.radius)
 		love.graphics.setColor(1, 0.5, 0.5, 1)
 		love.graphics.circle('line', enemy.xPos, enemy.yPos, enemy.radius)
 		--healthbar
 		love.graphics.setColor(1, 0.5, 0.5, 1)
-		love.graphics.rectangle('fill', 10, winY-20, (winX-20)*enemy.health/enemy.maxHealth, 10)
-		love.graphics.rectangle('line', 10, winY-20, winX-20, 10)
-
+		love.graphics.rectangle('fill', 10, winY + vertOffset*i, (winX-20)*enemy.health/enemy.maxHealth, 6)
+		love.graphics.rectangle('line', 10, winY + vertOffset*i, winX-20, 6)
 
 	end
 

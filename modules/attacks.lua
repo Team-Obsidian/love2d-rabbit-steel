@@ -6,6 +6,7 @@ aoeAttacks = {}
 bulletAttacks = {}
 
 function playerAttack1(b)
+	turnPlayerAround(playerList[b.id], enemyList[playerList[b.id].target])
 	local a = {}
 	a.shape = b.shape or 'circle'
 	a.xPos = b.xPos or winX/2
@@ -25,6 +26,7 @@ function playerAttack1(b)
 end
 
 function playerAttack2(b)
+	turnPlayerAround(playerList[b.id], enemyList[playerList[b.id].target])
 	local a = {}
 	a.id = b.id
 	a.shape = b.shape or 'circle'

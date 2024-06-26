@@ -35,6 +35,11 @@ function genPlayer(b)
     a.maxHealth = 5
     a.health = a.maxHealth
 
+    a.inputDevice = b.inputDevice
+    a.controllerID = b.controllerID
+
+    a.color = b.color or 'yellow'
+
     --arbitrary 4 player limit
     for i=1,4 do
     	if playerList[i] == nil then
@@ -49,7 +54,8 @@ function genPlayer(b)
     end
 
 end
-genPlayer{}
+genPlayer{color='yellow', inputDevice = 'keyboard'}
+--genPlayer{color='blue', inputDevice = 'controller'}
 
 function genEnemy(b)
     local a = {}

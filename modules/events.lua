@@ -25,7 +25,7 @@ function checkAttackEvents(timePass)
 			elseif event.category == 'enemyAtk1' then
 				enemyAttack1(event.param)
 			elseif event.category == 'enemyAtk2' then
-				print('ooookie')
+				--print('ooookie')
 				enemyAttack2(event.param)
 			end
 			attackList[i] = nil
