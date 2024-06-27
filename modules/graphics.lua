@@ -1,7 +1,11 @@
+local width, height = love.window.getDesktopDimensions()
 winX = 640
 winY = 360
-winScale = 3
+--only if you want maximized window something something
+--winScale = 3
+winScale = 0.5 * math.min(width/winX, height/winY)
 love.window.setMode(winX*winScale,winY*winScale)
+
 
 function displayTimer(fps)
 	--print(tostring(tonumber(tostring(0))))
