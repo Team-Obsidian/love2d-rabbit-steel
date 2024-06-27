@@ -4,7 +4,7 @@ function compassPoint(b, c, radius)
 	local objTo = c or b
 	--used to point to player's target.
 	--todo: make default if objTo is nil or radius is nil
-
+	radius = radius or 0
 
 
 	a.angle = math.atan2(objTo.yPos - objFrom.yPos, objTo.xPos - objFrom.xPos)

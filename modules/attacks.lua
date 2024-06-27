@@ -74,7 +74,7 @@ function enemyAttack2(b)
 	a.yPos = b.yPos
 	a.radius = b.radius or 10
 	--a.duration = b.duration or 1
-	a.velocity = b.velocity or 200
+	a.velocity = b.velocity
 	a.angle = b.angle or 0
 
 
@@ -99,6 +99,27 @@ function initEnemyAttack2(bulletNum, b)
 		else
 			genAttackEvent('enemyAtk2',interval*i,b)			
 		end
+	end
+end
+
+function initEnemyAttack3(a, b)
+	--bullet stream aimed directly at you
+	local enemy = enemyList[math.random(1, objNumber(enemyList))]
+	local playerTarget = playerList[math.random(1,objNumber(playerList))]
+	local angleTo = compassPoint(enemy, playerTarget).angle
+
+	local c = {}
+	c.xPos=enemy.xPos or b.xPos
+	c.yPos=enemy.yPos or b.yPos
+	c.shape='bullet' or b.shape
+	c.owner='enemy' or b.owner
+	c.angle=angleTo or b.angle
+	c.velocity = b.velocity or 200 
+	c.id=enemy.id or b.id
+
+
+	for i=1, a.bulletNum do
+		genAttackEvent('enemyAtk2',a.interval*i,c)
 	end
 end
 

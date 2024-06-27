@@ -90,7 +90,9 @@ function love.update(dTime)
 
 		--if player's enemy is defeated, redirect to lowest id
 		-- (in the real game, retargets to nearest enemy in probably every second)
-		playerTarget(player)
+		if objNumber(enemyList) > 0 then
+			playerTarget(player)
+		end
 
 
 
@@ -387,15 +389,24 @@ function love.keypressed(key, scancode, isrepeat)
 	end
 
 	if key == 'k' then
-		initEnemyAttack2(5)
+		--initEnemyAttack2(5,)
+		initEnemyAttack3({
+			bulletNum=6,
+			interval=0.5,
+		},
+		{
+			velocity = 800,
+			radius=3
+		})
 	end
 
 	if key == 'l' then
+		local randPlayer = playerList[math.random(1,objNumber(playerList))]
 		--hardcoding, randomize target later
 		genAttackEvent('enemyAtk1', 1.5, {
-			id=1,
-			xPos=playerList[1].xPos,
-			yPos=playerList[1].yPos,
+			id=randPlayer.id,
+			xPos=randPlayer.xPos,
+			yPos=randPlayer.yPos,
 			shape='circle',
 			owner='enemy',
 			duration = 3

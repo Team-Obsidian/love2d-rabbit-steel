@@ -40,7 +40,7 @@ function checkAttacks(category, timePass)
 		--everything is based on shape, done to make working with
 		--category parameter easier, harder to compartmentalize
 		if attack.shape == 'bullet' then
-			local margin = 200
+			local margin = 50
 			--need to create margin for error, or maybe some camera function
 			--in the future, make alternative check for if a hitbox has crossed paths with the bullet
 			--and not just its immediate hitbox, but its path
