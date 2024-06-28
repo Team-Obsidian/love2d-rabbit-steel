@@ -12,6 +12,8 @@ function genAttackEvent(category, duration, param)
 	a.duration = duration
 	a.maxDuration = duration
 	a.param = param
+
+
 	table.insert(attackList, a)
 end
 
@@ -36,7 +38,8 @@ function checkAttackEvents(timePass)
 end
 
 function checkAttacks(category, timePass)
-	for i, attack in pairs(category) do
+	for i, attacking in pairs(category) do
+		local attack = attacking
 		--everything is based on shape, done to make working with
 		--category parameter easier, harder to compartmentalize
 		if attack.shape == 'bullet' then
@@ -49,9 +52,11 @@ function checkAttacks(category, timePass)
 				category[i] = nil
 				--print('bad')
 			else
+				--print('attack.owner is '.. tostring(attacking.owner))
 				-- potential future consequences, whether hitbox happens before or after the bullet is moved
 				if attack.owner == 'enemy' then
 					for i, player in pairs(playerList) do
+						print(tostring(collideCircle(player,attack)))
 						if collideCircle(player,attack) and player.hitable then
 							playerHit(player)
 						end

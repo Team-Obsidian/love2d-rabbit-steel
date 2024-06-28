@@ -6,7 +6,7 @@ aoeAttacks = {}
 bulletAttacks = {}
 
 function playerAttack1(b)
-	turnPlayerAround(playerList[b.id], enemyList[playerList[b.id].target])
+
 	local a = {}
 	a.shape = b.shape or 'circle'
 	a.xPos = b.xPos or winX/2
@@ -16,37 +16,39 @@ function playerAttack1(b)
 	a.duration = b.duration or 0.1
 
 	a.owner = 'player'
-	a.id = b.id
 	a.player = b.player
-	playerList[a.id].globalCD = 1
-	playerList[a.id].primaryCD = 1
+	a.player.globalCD = 1
+	a.player.primaryCD = 1
  
+
+ 	turnPlayerAround(a.player, enemyList[a.player.target])
 	table.insert(aoeAttacks,a)
 	playSound(sfx.attack1, 'cut')
 end
 
 function playerAttack2(b)
-	turnPlayerAround(playerList[b.id], enemyList[playerList[b.id].target])
 	local a = {}
-	a.id = b.id
-	a.shape = b.shape or 'circle'
-	if enemyList[playerList[a.id].target] == nil then
-		a.xPos = b.xPos or  playerList[a.id].xPos
-		a.yPos = b.yPos or  playerList[a.id].yPos
-	else
-		a.xPos = b.xPos or enemyList[playerList[a.id].target].xPos
-		a.yPos = b.yPos or enemyList[playerList[a.id].target].yPos
-	end
 	a.radius = b.radius or 40
 	a.damage = b.damage or 40
 	a.duration = b.duration or 0.1
 
 	a.owner = 'player'
+	a.player = b.player
+
+	a.player.globalCD = 1.2
+	a.player.primaryCD = 1.2
+	a.shape = b.shape or 'circle'
 
 
-	playerList[a.id].globalCD = 1.2
-	playerList[a.id].primaryCD = 1.2
- 
+	if enemyList[a.player.target] == nil then
+		a.xPos = b.xPos or  a.player.xPos
+		a.yPos = b.yPos or  a.player.yPos
+	else
+		a.xPos = b.xPos or enemyList[a.player.target].xPos
+		a.yPos = b.yPos or enemyList[a.player.target].yPos
+	end
+
+  	turnPlayerAround(a.player, enemyList[a.player.target])
 	table.insert(aoeAttacks,a)
 	playSound(sfx.attack2, 'cut')
 end
@@ -61,8 +63,7 @@ function enemyAttack1(b)
 	a.duration = b.duration or 1
 
 	a.owner = 'enemy'
-	a.id = b.id
-
+	a.enemy = b.enemy
 	table.insert(aoeAttacks,a)
 	playSound(sfx.attack2, 'cut')
 end
@@ -78,8 +79,8 @@ function enemyAttack2(b)
 	a.angle = b.angle or 0
 
 
-	--a.owner = 'enemy'
-	a.id = b.id
+	a.owner = 'enemy'
+	a.enemy = b.enemy
 	table.insert(bulletAttacks,a)
 	playSound(sfx.attack1, 'cut')
 end
@@ -103,19 +104,20 @@ function initEnemyAttack2(bulletNum, b)
 end
 
 function initEnemyAttack3(a, b)
-	--bullet stream aimed directly at you
-	local enemy = enemyList[math.random(1, objNumber(enemyList))]
-	local playerTarget = playerList[math.random(1,objNumber(playerList))]
+	--bullet stream aimed directly at you, random attack from random enemy
+	local enemy = a.enemy or enemyList[math.random(1, objNumber(enemyList))]
+	local playerTarget = a.player or playerList[math.random(1,objNumber(playerList))]
 	local angleTo = compassPoint(enemy, playerTarget).angle
 
 	local c = {}
-	c.xPos=enemy.xPos or b.xPos
-	c.yPos=enemy.yPos or b.yPos
-	c.shape='bullet' or b.shape
-	c.owner='enemy' or b.owner
-	c.angle=angleTo or b.angle
-	c.velocity = b.velocity or 200 
-	c.id=enemy.id or b.id
+	c.xPos=b.xPos or enemy.xPos
+	c.yPos=b.yPos or enemy.yPos
+	c.shape=b.shape or 'bullet'
+	c.owner=b.owner or 'enemy'
+	c.angle=b.angle or angleTo 
+	c.velocity = b.velocity or 200
+	c.radius = b.radius or 8 
+	c.enemy=enemy
 
 
 	for i=1, a.bulletNum do

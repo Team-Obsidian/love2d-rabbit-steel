@@ -72,8 +72,9 @@ function love.update(dTime)
 
 
 	--movement
-	for i, player in pairs(playerList) do
+	for i, playerTemp in pairs(playerList) do
 		local playerID = i
+		local player = playerTemp
 		playerPassCD(player, dTime)
 
 
@@ -107,10 +108,10 @@ function love.update(dTime)
 		if player.inputDevice == 'keyboard' then
 			--adjust for controllers in future
 			if love.keyboard.isDown('z') and player.globalCD == 0 and player.primaryCD == 0 then
-				playerAttack1{xPos=player.xPos,yPos=player.yPos,id=playerID,player=playerList[playerID]}
+				playerAttack1{xPos=player.xPos,yPos=player.yPos,player=player}
 			end
 			if love.keyboard.isDown('x') and player.globalCD == 0 and player.primaryCD == 0 then
-				playerAttack2{id=playerID,player=playerList[playerID]}
+				playerAttack2{player=player}
 			end
 			--if holding opposite sides, cancel out
 			if love.keyboard.isDown('left') then
@@ -336,8 +337,8 @@ function love.draw()
 		--only 'bullet' shape exists, doesn't need another check
 			--print('okay')
 		--print(attack.owner)
-		love.graphics.setColor(1, 0.5,0.5, 0.3)
-		love.graphics.circle('fill', attack.xPos, attack.yPos, attack.radius)
+		--love.graphics.setColor(1, 0.5,0.5, 0.3)
+		--love.graphics.circle('fill', attack.xPos, attack.yPos, attack.radius)
 		if attack.owner == 'player' then
 
 			--no player attacks actually have bullets, may be unnecessary
@@ -346,7 +347,7 @@ function love.draw()
 			love.graphics.setColor(1, 1,1, 0.8)
 			love.graphics.circle('line', attack.xPos, attack.yPos, attack.radius)
 		elseif attack.owner == 'enemy' then
-			print('kthen')
+			--print('kthen')
 			love.graphics.setColor(1, 0.5,0.5, 0.3)
 			love.graphics.circle('fill', attack.xPos, attack.yPos, attack.radius)
 			love.graphics.setColor(1, 0.5,0.5, 0.8)
@@ -395,11 +396,12 @@ function love.keypressed(key, scancode, isrepeat)
 		--initEnemyAttack2(5,)
 		initEnemyAttack3({
 			bulletNum=6,
-			interval=0.5,
+			interval=0.8,
 		},
 		{
-			velocity = 800,
-			radius=3
+			velocity = 200,
+			radius=6,
+			--enemy=enemyList[random]
 		})
 	end
 

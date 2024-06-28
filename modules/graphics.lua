@@ -34,7 +34,7 @@ function displayFloatMsg(timePass)
 			if msg.duration/msg.maxDuration > fadePercent then
 				opacity = 1 - ((msg.duration/msg.maxDuration-fadePercent)/(1-fadePercent))
 			end
-			print('opacity is '..opacity)
+			--print('opacity is '..opacity)
 		--future room for text effects...
 		--love.graphics.print(text, msg.xPos, msg.yPos, 0, 1, 1, 0, 0, 0, 0)
 			local displayColor = {}
