@@ -66,7 +66,7 @@ function love.update(dTime)
 
 		if alreadyExists == false then
 			print('new player generated! ID: '..joystickID)
-			genPlayer{inputDevice='controller',controllerID=joystickID, color='blue'}
+			genPlayer{inputDevice='controller',controllerID=joystickID, color='blue1'}
 		end
 	end
 
@@ -107,10 +107,10 @@ function love.update(dTime)
 		if player.inputDevice == 'keyboard' then
 			--adjust for controllers in future
 			if love.keyboard.isDown('z') and player.globalCD == 0 and player.primaryCD == 0 then
-				playerAttack1{xPos=player.xPos,yPos=player.yPos,id=playerID}
+				playerAttack1{xPos=player.xPos,yPos=player.yPos,id=playerID,player=playerList[playerID]}
 			end
 			if love.keyboard.isDown('x') and player.globalCD == 0 and player.primaryCD == 0 then
-				playerAttack2{id=playerID}
+				playerAttack2{id=playerID,player=playerList[playerID]}
 			end
 			--if holding opposite sides, cancel out
 			if love.keyboard.isDown('left') then
@@ -140,10 +140,10 @@ function love.update(dTime)
 					--6 axis, L2 and R2 are axis 5 and 6
 					
 					if joystick:isGamepadDown('a') and player.globalCD == 0 and player.primaryCD == 0 then
-						playerAttack1{xPos=player.xPos,yPos=player.yPos,id=playerID}
+						playerAttack1{xPos=player.xPos,yPos=player.yPos,id=playerID,player=playerList[playerID]}
 					end
 					if joystick:isGamepadDown('b') and player.globalCD == 0 and player.primaryCD == 0 then
-						playerAttack2{id=playerID}
+						playerAttack2{id=playerID,player=playerList[playerID]}
 					end
 
 					lstickX = joystick:getAxis(1)
@@ -226,14 +226,14 @@ function love.draw()
 			tempOpacity = 0.5
 		end
 
-		if player.color == 'yellow' then
+		if player.color == 'yellow1' then
 			love.graphics.setColor(1, 1, 0.5, tempOpacity)
 			love.graphics.circle('fill', player.xPos, player.yPos, player.radius)
 			love.graphics.setColor(1, 1, 0.5, tempOpacity*0.2)
 			love.graphics.circle('fill', player.xPos, player.yPos, 5*player.radius)
 			love.graphics.setColor(1, 1, 1, tempOpacity)
 			love.graphics.circle('line', player.xPos, player.yPos, 5*player.radius)
-		elseif player.color == 'blue' then
+		elseif player.color == 'blue1' then
 			love.graphics.setColor(0.5, 0.5, 1, tempOpacity)
 			love.graphics.circle('fill', player.xPos, player.yPos, player.radius)
 			love.graphics.setColor(0.5, 0.5, 1, tempOpacity*0.2)
@@ -353,6 +353,9 @@ function love.draw()
 			love.graphics.circle('line', attack.xPos, attack.yPos, attack.radius)				
 		end
 	end
+
+	--better solution for getDelta later
+	displayFloatMsg(love.timer.getDelta())
 
 	love.graphics.pop()
 

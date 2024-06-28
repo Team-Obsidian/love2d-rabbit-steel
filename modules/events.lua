@@ -86,6 +86,16 @@ function checkAttacks(category, timePass)
 					for i, enemy in pairs(enemyList) do
 						--check circular collision
 						if collideCircle(enemy, attack) then
+
+							--adjust text position later, text for now
+							--also adjust color later
+							genFloatMsg{
+								xPos=enemy.xPos + math.random(-10,10),
+								yPos=enemy.yPos + math.random(-10,10),
+								text=tostring(attack.damage),
+								color=color[attack.player.color]
+							}
+
 							enemy.health = enemy.health - attack.damage
 							print('hit: Enemy '..tostring(enemy.id)..
 								' | remaining : '..enemy.health..'/'..enemy.maxHealth)

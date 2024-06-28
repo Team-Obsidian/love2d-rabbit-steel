@@ -54,7 +54,7 @@ function genPlayer(b)
     end
 
 end
-genPlayer{color='yellow', inputDevice = 'keyboard'}
+genPlayer{color='yellow1', inputDevice = 'keyboard'}
 --genPlayer{color='blue', inputDevice = 'controller'}
 
 function genEnemy(b)

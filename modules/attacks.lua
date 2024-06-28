@@ -17,7 +17,7 @@ function playerAttack1(b)
 
 	a.owner = 'player'
 	a.id = b.id
-
+	a.player = b.player
 	playerList[a.id].globalCD = 1
 	playerList[a.id].primaryCD = 1
  
