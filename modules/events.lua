@@ -24,6 +24,8 @@ function checkAttackEvents(timePass)
 		if event.duration <= 0 then
 			if event.category == 'playerAtk1' then
 				playerAttack1(event.param)
+			elseif event.category == 'playerAtk2' then
+				playerAttack2(event.param)
 			elseif event.category == 'enemyAtk1' then
 				enemyAttack1(event.param)
 			elseif event.category == 'enemyAtk2' then
@@ -67,6 +69,9 @@ function checkAttacks(category, timePass)
 						if collideCircle(enemy,attack) then
 							--enemy gets hit
 							if attack.damage ~= nil then
+								--damage calculation
+
+
 								enemy.health = enemy.health - attack.damage
 							else
 								print('this attack has no damage haha')
@@ -91,17 +96,25 @@ function checkAttacks(category, timePass)
 					for i, enemy in pairs(enemyList) do
 						--check circular collision
 						if collideCircle(enemy, attack) then
+							local calculatedAttack = randomizePlayerDamage(attack)
+							local critMessage = ''
+							if calculatedAttack.critical then
+								critMessage = '!'
+							end
 
 							--adjust text position later, text for now
 							--also adjust color later
 							genFloatMsg{
 								xPos=enemy.xPos + math.random(-10,10),
 								yPos=enemy.yPos + math.random(-10,10),
-								text=tostring(attack.damage),
+								text=tostring(calculatedAttack.damage) .. critMessage,
 								color=color[attack.player.color]
 							}
 
-							enemy.health = enemy.health - attack.damage
+							--enemy.health = enemy.health - attack.damage
+							enemy.health = enemy.health - calculatedAttack.damage
+
+
 							print('hit: Enemy '..tostring(enemy.id)..
 								' | remaining : '..enemy.health..'/'..enemy.maxHealth)
 							attack.duration = -1
@@ -125,9 +138,37 @@ function checkAttacks(category, timePass)
 end
 
 
+--all damage is calculated from here, changing data is practically global
+function randomizePlayerDamage(attack)
+
+	local critIncrease = 1
+	local critHasHappened = false
+	--local randomValue = math.random()
+	--30% chance for a crit, that deal 75% extra damage
+	if math.random() <= 0.3 then
+		critIncrease = 1.75
+		critHasHappened = true
+	end
 
 
+	local baseDmg
+	local percentVariance = 0.2
+	--example: 0.8 to 1.2, 0.2*2 = 0.4, math.random()*0.4 + 0.8
+	local modifiedDamage = 2*percentVariance*math.random() + (1-percentVariance)
+	--critical hits deal 75% more damage
+
+	if attack.name == 'playerAttack1' then
+		--	return baseDmg*modifiedDamage * (1 + attack.player.level/100) * attack.player.primaryModifers
+		baseDmg = 50
+	elseif attack.name == 'playerAttack2' then
+		baseDmg = 40
+	end
 
 
+	--primary modifiers like the 20% increase from gear, rabbit and steel
 
+
+	return {damage=math.floor(baseDmg*modifiedDamage*critIncrease),critical=critHasHappened} --the flooring is arbitrary...
+
+end
 

@@ -395,11 +395,11 @@ function love.keypressed(key, scancode, isrepeat)
 	if key == 'k' then
 		--initEnemyAttack2(5,)
 		initEnemyAttack3({
-			bulletNum=6,
-			interval=0.8,
+			bulletNum=20,
+			interval=0.1,
 		},
 		{
-			velocity = 200,
+			velocity = 500,
 			radius=6,
 			--enemy=enemyList[random]
 		})

@@ -8,6 +8,7 @@ bulletAttacks = {}
 function playerAttack1(b)
 
 	local a = {}
+	a.name = 'playerAttack1'
 	a.shape = b.shape or 'circle'
 	a.xPos = b.xPos or winX/2
 	a.yPos = b.yPos or winY/2
@@ -28,6 +29,7 @@ end
 
 function playerAttack2(b)
 	local a = {}
+	a.name = 'playerAttack1'
 	a.radius = b.radius or 40
 	a.damage = b.damage or 40
 	a.duration = b.duration or 0.1
@@ -55,6 +57,7 @@ end
 
 function enemyAttack1(b)
 	local a = {}
+	a.name = 'enemyAttack1'
 	a.shape = b.shape or 'circle'
 	a.xPos = b.xPos or winX/2
 	a.yPos = b.yPos or winY/2
@@ -70,6 +73,7 @@ end
 
 function enemyAttack2(b)
 	local a = {}
+	a.name = 'enemyAttack2'
 	a.shape = b.shape or 'bullet'
 	a.xPos = b.xPos
 	a.yPos = b.yPos

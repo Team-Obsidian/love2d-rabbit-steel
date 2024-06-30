@@ -1,10 +1,12 @@
 function compassPoint(b, c, radius)
 	local a = {}
 	local objFrom = b
+--	if objFrom == nil then 
 	local objTo = c or b
 	--used to point to player's target.
 	--todo: make default if objTo is nil or radius is nil
 	radius = radius or 0
+
 
 
 	a.angle = math.atan2(objTo.yPos - objFrom.yPos, objTo.xPos - objFrom.xPos)
@@ -100,8 +102,10 @@ function playerTarget(player)
 	if objNumber(enemyList) > 0 then
 		local distanceTable = {}
 		for i, enemy in pairs(enemyList) do
-			local distance = 0
-			table.insert(distanceTable, i, findDistance(player, enemy))
+			local distance = findDistance(player, enemy)
+			if distance ~= nil then
+				table.insert(distanceTable, i, distance)
+			end
 		end
 		local minValue = math.min(unpack(distanceTable))
 		for i, value in pairs(distanceTable) do
