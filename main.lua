@@ -20,6 +20,7 @@ function love.load()
 	arrow = love.graphics.newImage('img/arrow.png')
 	arrow2 = love.graphics.newImage('img/arrow2.png')
 	meiryoub = love.graphics.newFont('meiryoub.ttf', 36)
+	meiryoubSmall = love.graphics.newFont('meiryoub.ttf', 18)
 
     function collideCircle(object1, object2) 
         local something = findDistance(object1, object2)
@@ -27,11 +28,11 @@ function love.load()
         return object1.radius + object2.radius > something
     end
 
-    function turnPlayerAround(player, enemy)
+    function turnPlayerAround(player)
     	--bias toward facing right
-    	if enemy ~= nil then
-	    	if player.xPos > enemy.xPos then player.facing = 'left'
-	       	elseif player.xPos <= enemy.xPos then player.facing = 'right' end
+    	if player.target ~= nil then
+	    	if player.xPos > player.target.xPos then player.facing = 'left'
+	       	elseif player.xPos <= player.target.xPos then player.facing = 'right' end
 	    end
     end
 
@@ -253,7 +254,7 @@ function love.draw()
 		love.graphics.draw(arrow, player.xPos + arrowOffX*facingSide, player.yPos, 0, facingSide, 1, 
 			arrow:getWidth()/2, arrow:getHeight()/2)
 
-		local targetArrow = compassPoint(player, enemyList[player.target], 32)
+		local targetArrow = compassPoint(player, player.target, 32)
 		love.graphics.draw(arrow2, 
 			targetArrow.xPos,
 			targetArrow.yPos, 

@@ -22,7 +22,7 @@ function playerAttack1(b)
 	a.player.primaryCD = 1
  
 
- 	turnPlayerAround(a.player, enemyList[a.player.target])
+ 	turnPlayerAround(a.player)
 	table.insert(aoeAttacks,a)
 	playSound(sfx.attack1, 'cut')
 end
@@ -42,15 +42,15 @@ function playerAttack2(b)
 	a.shape = b.shape or 'circle'
 
 
-	if enemyList[a.player.target] == nil then
+	if a.player.target == nil then
 		a.xPos = b.xPos or  a.player.xPos
 		a.yPos = b.yPos or  a.player.yPos
 	else
-		a.xPos = b.xPos or enemyList[a.player.target].xPos
-		a.yPos = b.yPos or enemyList[a.player.target].yPos
+		a.xPos = b.xPos or a.player.target.xPos
+		a.yPos = b.yPos or a.player.target.yPos
 	end
 
-  	turnPlayerAround(a.player, enemyList[a.player.target])
+  	turnPlayerAround(a.player)
 	table.insert(aoeAttacks,a)
 	playSound(sfx.attack2, 'cut')
 end

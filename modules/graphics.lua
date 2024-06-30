@@ -49,7 +49,7 @@ function displayFloatMsg(timePass)
 			love.graphics.setColor(unpack(displayColor))
 			--love.graphics.setColor(1, 1, 1, 0.1)
 			--love.graphics.setColor(unpack(msg.color), opacity)
-			love.graphics.print(msg.text, msg.xPos, msg.yPos + floatY)
+			love.graphics.print(msg.text, meiryoubSmall, msg.xPos, msg.yPos + floatY)
 		end
 
 		msg.duration = msg.duration + timePass

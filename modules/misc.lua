@@ -101,18 +101,32 @@ function playerTarget(player)
 	--auto target closest player, create auto system for tab targetting later
 	if objNumber(enemyList) > 0 then
 		local distanceTable = {}
+
 		for i, enemy in pairs(enemyList) do
 			local distance = findDistance(player, enemy)
-			if distance ~= nil then
-				table.insert(distanceTable, i, distance)
-			end
+			--print(tostring(distance))
+			table.insert(distanceTable, i, distance)
 		end
-		local minValue = math.min(unpack(distanceTable))
+
+		local lowestID = 1
+		local lowestValue = math.huge 	--is using math.huge okay...?
 		for i, value in pairs(distanceTable) do
-			if value == minValue then
-				player.target = i
+			if value < lowestValue then
+				lowestID = i
+				lowestValue = value
 			end
 		end
+
+		player.target = enemyList[lowestID]
+
+
+
+
+
+
+		--local minValue = math.min(unpack(tempTable))
+		
+
 	else
 		--print('no enemy to target')
 	end
