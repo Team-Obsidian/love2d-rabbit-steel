@@ -18,7 +18,7 @@ end
 
 -- rotates exactly on a circle if no internal conditional is specified
 function tetherPhysics(player, a) --instantaneous teleport but that's okay I guess
-	if not collideCircle(player, a) then
+	if findDistance(player, a) > a.radius then
 		local temp = compassPoint(a, player, a.radius)
 		player.xPos = temp.xPos
 		player.yPos = temp.yPos

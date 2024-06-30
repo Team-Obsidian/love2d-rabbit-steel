@@ -201,13 +201,13 @@ function love.update(dTime)
 		player.xPos = player.xPos + player.speed*vectorX*dTime
 		player.yPos = player.yPos + player.speed*vectorY*dTime
 
---[[
+
 		tetherPhysics(player, {
 			xPos=winX/2,
 			yPos=winY/2,
 			radius=50
 		})
---]]
+
 
 
 	end
