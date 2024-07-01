@@ -3,7 +3,9 @@ winX = 640
 winY = 360
 --only if you want maximized window something something
 --winScale = 3
-winScale = 0.5 * math.min(width/winX, height/winY)
+--winScale = 0.5 * math.min(width/winX, height/winY)
+winScale = 1
+
 love.window.setMode(winX*winScale,winY*winScale)
 
 
@@ -12,8 +14,8 @@ floatMsg = {}
 function genFloatMsg(b)
 	local a = {}
 	--add the initial offset X and Y into xPos, when generating
-	a.xPos = b.xPos or winX/2
-	a.yPos = b.yPos or winY/2
+	a.xPos = b.xPos or winCamX/2
+	a.yPos = b.yPos or winCamY/2
 	a.duration = 0
 	a.maxDuration = b.maxDuration or 1
 	a.text = b.text or 'this message is empty'

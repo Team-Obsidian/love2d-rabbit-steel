@@ -17,6 +17,56 @@ function genAttackEvent(category, duration, param)
 	table.insert(attackList, a)
 end
 
+
+transitionList = {}
+function genTransitionEvent(category, duration, param)
+	--no timing type besides linear, determine that in the interpreter
+	local a = {}
+	a.category = category
+	a.duration = 0
+	a.maxDuration = duration
+	a.param = param
+	table.insert(transitionList, a)
+end
+
+
+function checkTransitionEvent(timePass)
+	for i, event in pairs(transitionList) do
+		if event.duration <= event.maxDuration then
+			if event.category == 'cameraScale' then
+				--uses change bounds, but another function should be made later to change bounds independently of camera
+				changeBounds(((event.param.final-event.param.init) *  event.duration/event.maxDuration) + event.param.init)
+
+			elseif event.category == 'playerMovement' then
+				--insert player movement cutscene here
+				local tempValueX = (event.param.finalPosX-event.param.initPosX) *  (event.duration/event.maxDuration) + event.param.initPosX
+				local tempValueY = (event.param.finalPosY-event.param.initPosY) *  (event.duration/event.maxDuration) + event.param.initPosY
+				event.param.player.xPos = tempValueX
+				event.param.player.yPos = tempValueY
+			else -- any direct variable not given a specific scenario
+				local tempValue = (event.param.final-event.param.init) *  (event.duration/event.maxDuration) + event.param.init
+				print(tempValue)
+				--event.category = tempValue
+				playerList[1].xPos = tempValue
+				--print('event.category is: ' .. event.category)
+			end
+
+			
+		elseif event.duration > event.maxDuration then
+			if event.category == 'cameraScale' then
+				changeBounds(event.param.final)
+			else -- any direct variable not given a specific scenario
+				event.category = event.param.final
+				print('time over')
+			end
+			
+			transitionList[i] = nil --after everything else is finished
+		end
+
+		event.duration = event.duration + timePass
+	end
+end
+
 function checkAttackEvents(timePass)
 	--print('test occured')
 	for i, event in pairs(attackList) do
@@ -45,11 +95,11 @@ function checkAttacks(category, timePass)
 		--everything is based on shape, done to make working with
 		--category parameter easier, harder to compartmentalize
 		if attack.shape == 'bullet' then
-			local margin = 50
+			local margin = 10
 			--need to create margin for error, or maybe some camera function
 			--in the future, make alternative check for if a hitbox has crossed paths with the bullet
 			--and not just its immediate hitbox, but its path
-			if attack.xPos < -margin or attack.xPos > winX + margin or attack.yPos < -margin or attack.yPos > winY + margin then
+			if attack.xPos < boundL-margin or attack.xPos > boundR + margin or attack.yPos < boundL-margin or attack.yPos > boundR + margin then
 				--attack.duration = -1
 				category[i] = nil
 				--print('bad')
@@ -85,7 +135,9 @@ function checkAttacks(category, timePass)
 			end
 		elseif attack.duration >= 0 then
 			if attack.shape == 'circle' then
-				if attack.owner == 'enemy' then
+				if attack.clearBullets == true then
+					checkBulletClear(attack)
+				elseif attack.owner == 'enemy' then
 					for i, player in pairs(playerList) do
 						--check circular collision
 						if collideCircle(player, attack) and player.hitable then

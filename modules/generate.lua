@@ -1,11 +1,15 @@
 playerList = {}
 enemyList = {}
 
+
+
+require('modules/misc')
+
 function genPlayer(b)
 	local a = {}
 
-	a.xPos = b.xPos or winX/2
-	a.yPos = b.yPos or winY/2
+	a.xPos = b.xPos or 0
+	a.yPos = b.yPos or 0
 	a.radius = b.radius or 4
 
 	--effects
@@ -49,7 +53,7 @@ function genPlayer(b)
     end
 
     -- auto-insert into table
-    if a.id == nil then print('trying to add more then 4 players') else 
+    if a.id == nil then print('trying to add more than 4 players') else 
     	table.insert(playerList, a.id, a)
     end
 
@@ -60,8 +64,8 @@ genPlayer{color='yellow1', inputDevice = 'keyboard'}
 function genEnemy(b)
     local a = {}
 
-    a.xPos = b.xPos or winX*2/3
-    a.yPos = b.yPos or winY/2
+    a.xPos = b.xPos or boundL + winCamX*2/3
+    a.yPos = b.yPos or boundU + winCamY/2
     a.radius = b.radius or 100
 
     --effects
@@ -93,7 +97,7 @@ function genEnemy(b)
 
 end
 genEnemy{}
-genEnemy{xPos=winX/3}
+genEnemy{xPos=boundL + winCamX/3}
 
 
 --[[

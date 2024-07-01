@@ -15,12 +15,14 @@ function love.load()
 	require('modules/attacks')
 	require('modules/misc')
 
+	require('modules/playerMechanics')
+
 
 	currentTime = 0
 	arrow = love.graphics.newImage('img/arrow.png')
 	arrow2 = love.graphics.newImage('img/arrow2.png')
-	meiryoub = love.graphics.newFont('meiryoub.ttf', 36)
-	meiryoubSmall = love.graphics.newFont('meiryoub.ttf', 18)
+	meiryoub = love.graphics.newFont('meiryoub.ttf', 24)
+	meiryoubSmall = love.graphics.newFont('meiryoub.ttf', 12)
 
     function collideCircle(object1, object2) 
         local something = findDistance(object1, object2)
@@ -42,6 +44,7 @@ end
 function love.update(dTime)
 	--currentTime = love.timer.getTime()
 	currentTime = currentTime + dTime
+	checkTransitionEvent(dTime) -- order is arbitrary, maybe sort later
 
 	checkAttackEvents(dTime)
 
@@ -72,7 +75,7 @@ function love.update(dTime)
 	end
 
 
-	--movement
+
 	for i, playerTemp in pairs(playerList) do
 		local playerID = i
 		local player = playerTemp
@@ -109,10 +112,13 @@ function love.update(dTime)
 		if player.inputDevice == 'keyboard' then
 			--adjust for controllers in future
 			if love.keyboard.isDown('z') and player.globalCD == 0 and player.primaryCD == 0 then
-				playerAttack1{xPos=player.xPos,yPos=player.yPos,player=player}
+				playerAttack1{player=player}
 			end
-			if love.keyboard.isDown('x') and player.globalCD == 0 and player.primaryCD == 0 then
+			if love.keyboard.isDown('x') and player.globalCD == 0 and player.secondaryCD == 0 then
 				playerAttack2{player=player}
+			end
+			if love.keyboard.isDown('v') and player.globalCD == 0 and player.defensiveCD == 0 then
+				playerAttack4{player=player}
 			end
 			--if holding opposite sides, cancel out
 			if love.keyboard.isDown('left') then
@@ -142,10 +148,10 @@ function love.update(dTime)
 					--6 axis, L2 and R2 are axis 5 and 6
 					
 					if joystick:isGamepadDown('a') and player.globalCD == 0 and player.primaryCD == 0 then
-						playerAttack1{xPos=player.xPos,yPos=player.yPos,id=playerID,player=playerList[playerID]}
+						playerAttack1{player=player}
 					end
 					if joystick:isGamepadDown('b') and player.globalCD == 0 and player.primaryCD == 0 then
-						playerAttack2{id=playerID,player=playerList[playerID]}
+						playerAttack2{player=player}
 					end
 
 					lstickX = joystick:getAxis(1)
@@ -181,20 +187,20 @@ function love.update(dTime)
 
 		--bounds are currently hardcoded to window, 
 		--should make it dynamic, like rabbit and steel.
-		if player.xPos + player.speed*vectorX*dTime > winX then
-			player.xPos = winX
+		if player.xPos + player.speed*vectorX*dTime > boundR - boundMargin then
+			player.xPos = boundR - boundMargin
 			vectorX = 0
 		end
-		if player.xPos + player.speed*vectorX*dTime < 0 then
-			player.xPos = 0
+		if player.xPos + player.speed*vectorX*dTime < boundL + boundMargin then
+			player.xPos = boundL + boundMargin
 			vectorX = 0
 		end
-		if player.yPos + player.speed*vectorY*dTime > winY then
-			player.yPos = winY
+		if player.yPos + player.speed*vectorY*dTime > boundD - boundMargin then
+			player.yPos = boundD - boundMargin
 			vectorY = 0
 		end
-		if player.yPos + player.speed*vectorY*dTime < 0 then
-			player.yPos = 0
+		if player.yPos + player.speed*vectorY*dTime < boundU + boundMargin then
+			player.yPos = boundU + boundMargin
 			vectorY = 0
 		end
 
@@ -202,12 +208,13 @@ function love.update(dTime)
 		player.yPos = player.yPos + player.speed*vectorY*dTime
 
 
+		--[[
 		tetherPhysics(player, {
-			xPos=winX/2,
+			xPos=winCamX/2,
 			yPos=winY/2,
 			radius=50
 		})
-
+		-]]
 
 
 	end
@@ -215,14 +222,37 @@ function love.update(dTime)
 end
 
 function love.draw()
-	--print(player[1].xPos)
 	displayTimer(true)
 	love.graphics.push()
 	love.graphics.scale(winScale, winScale)
 
+	for i, enemy in pairs(enemyList) do
+		--healthbar
+		local vertOffset = -15
+		love.graphics.setColor(1, 0.5, 0.5, 1)
+		love.graphics.rectangle('fill', 10, winY + vertOffset*i, (winX-20)*enemy.health/enemy.maxHealth, 6)
+		love.graphics.rectangle('line', 10, winY + vertOffset*i, winX-20, 6)
+	end
+
+
+	love.graphics.scale(1/gameScale, 1/gameScale)
+	
+
+
+	love.graphics.translate(winCamX/2, winCamY/2 )
+
+
+		--print('player 1 - xPos: '..playerList[1].xPos..' yPos: '..playerList[1].yPos)
+
+
+	love.graphics.setColor(color.white1)
+	love.graphics.rectangle('line', boundL+boundMargin, boundU+boundMargin, winCamX-2*boundMargin, winCamY-2*boundMargin)
+
 
 	for i, player in pairs(playerList) do
 		--tempOpacity
+
+
 		local tempOpacity = 1
 		if player.hitable == false then
 			tempOpacity = 0.5
@@ -271,16 +301,11 @@ function love.draw()
 	end
 
 	for i, enemy in pairs(enemyList) do
-		local vertOffset = -15
+
 		love.graphics.setColor(1, 1, 1, 0.2)
 		love.graphics.circle('fill', enemy.xPos, enemy.yPos, enemy.radius)
 		love.graphics.setColor(1, 0.5, 0.5, 1)
 		love.graphics.circle('line', enemy.xPos, enemy.yPos, enemy.radius)
-		--healthbar
-		love.graphics.setColor(1, 0.5, 0.5, 1)
-		love.graphics.rectangle('fill', 10, winY + vertOffset*i, (winX-20)*enemy.health/enemy.maxHealth, 6)
-		love.graphics.rectangle('line', 10, winY + vertOffset*i, winX-20, 6)
-
 	end
 
 	--temporary before graphics
@@ -311,7 +336,7 @@ function love.draw()
 			local b = attack.param.yPos
 			local c = attack.param.radius or 10
 			local d = attack.param.angle or 0
-			local diagonal = (math.sqrt(winX^2+winY^2))
+			local diagonal = (math.sqrt(winCamX^2+winCamY^2))
 			love.graphics.line(a, b, math.cos(d)*diagonal + a, math.sin(d)*diagonal + b)
 		end
 	end
@@ -356,6 +381,7 @@ function love.draw()
 		end
 	end
 
+
 	--better solution for getDelta later
 	displayFloatMsg(love.timer.getDelta())
 
@@ -397,10 +423,10 @@ function love.keypressed(key, scancode, isrepeat)
 		--initEnemyAttack2(5,)
 		initEnemyAttack3({
 			bulletNum=20,
-			interval=0.1,
+			interval=0.2,
 		},
 		{
-			velocity = 500,
+			velocity = 100,
 			radius=6,
 			--enemy=enemyList[random]
 		})
@@ -422,6 +448,48 @@ function love.keypressed(key, scancode, isrepeat)
 	if key =='p' then
 		print('num of enemies: '..objNumber(enemyList))
 		--print('num of objs in bulletAttacks: ' .. tostring(objNumber(bulletAttacks)))
+	end
+
+	if key =='1' then
+		genTransitionEvent('cameraScale',2,{
+			init=gameScale,
+			final=0.5
+		})
+	end
+
+	if key == '2' then
+		genTransitionEvent('cameraScale',2,{
+			init=gameScale,
+			final=1.5
+		})
+	end
+
+	if key == '3' then
+
+		--[[
+		genTransitionEvent(playerList[1].xPos,2,{
+			init=playerList[1].xPos,
+			--init=50,
+			final=0
+		})
+		--]]
+
+		genTransitionEvent('playerMovement',2,{
+			player=playerList[1],
+			initPosX=playerList[1].xPos,
+			initPosY=playerList[1].yPos,
+			finalPosX=0,
+			finalPosY=0,
+		})
+
+		genTransitionEvent('xPos',2,{
+			table=playerList[1],
+			initPosX=playerList[1].xPos,
+			initPosY=playerList[1].yPos,
+			finalPosX=0,
+			finalPosY=0,
+		})
+
 	end
 
 end

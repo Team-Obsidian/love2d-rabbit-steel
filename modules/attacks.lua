@@ -1,35 +1,39 @@
 -- aoeAttacks for stuff like crow bullets and wolf screen side
 -- (has duration, shape is circle or side(i.e. wolf angle attack))
 aoeAttacks = {}
--- bulletAttacks for streams of bullets like ____
+-- bulletAttacks for streams of bullets like dragons
 -- (has angle, no duration, erased outside of screen boundaries)
 bulletAttacks = {}
 
+-- Heavyblade's Primary
 function playerAttack1(b)
 
 	local a = {}
-	a.name = 'playerAttack1'
-	a.shape = b.shape or 'circle'
-	a.xPos = b.xPos or winX/2
-	a.yPos = b.yPos or winY/2
-	a.radius = b.radius or 80
-	a.damage = b.damage or 50
-	a.duration = b.duration or 0.1
 
 	a.owner = 'player'
 	a.player = b.player
 	a.player.globalCD = 1
 	a.player.primaryCD = 1
- 
+
+	a.name = 'playerAttack1'
+	a.shape = b.shape or 'circle'
+	a.xPos = b.xPos or a.player.xPos
+	a.yPos = b.yPos or a.player.yPos
+	a.radius = b.radius or 80
+	a.damage = b.damage or 50
+	a.duration = b.duration or 0.1
+
+
 
  	turnPlayerAround(a.player)
 	table.insert(aoeAttacks,a)
 	playSound(sfx.attack1, 'cut')
 end
 
+-- Dancer's Secondary
 function playerAttack2(b)
 	local a = {}
-	a.name = 'playerAttack1'
+	a.name = 'playerAttack2'
 	a.radius = b.radius or 40
 	a.damage = b.damage or 40
 	a.duration = b.duration or 0.1
@@ -37,8 +41,8 @@ function playerAttack2(b)
 	a.owner = 'player'
 	a.player = b.player
 
-	a.player.globalCD = 1.2
-	a.player.primaryCD = 1.2
+	a.player.globalCD = 1.3
+	a.player.secondaryCD = 1.3
 	a.shape = b.shape or 'circle'
 
 
@@ -55,12 +59,38 @@ function playerAttack2(b)
 	playSound(sfx.attack2, 'cut')
 end
 
+
+function playerAttack4(b)
+	local a = {}
+
+	a.owner = 'player'
+	a.player = b.player
+--	a.player.globalCD = 1.2
+	a.player.defensiveCD = 8
+	a.player.hitTimer = 2 	--seconds of invincibility
+	
+	a.name = 'playerAttack4'
+	a.xPos = b.xPos or a.player.xPos
+	a.yPos = b.yPos or a.player.yPos
+	a.radius = b.radius or 60
+
+	a.damage = b.damage or 0
+	a.duration = b.duration or 0.1
+	a.shape = b.shape or 'circle'
+
+	a.clearBullets = true
+
+  	--turnPlayerAround(a.player)
+	table.insert(aoeAttacks,a)
+	playSound(sfx.attack2, 'cut')
+end
+
 function enemyAttack1(b)
 	local a = {}
 	a.name = 'enemyAttack1'
 	a.shape = b.shape or 'circle'
-	a.xPos = b.xPos or winX/2
-	a.yPos = b.yPos or winY/2
+	a.xPos = b.xPos or winCamX/2
+	a.yPos = b.yPos or winCamY/2
 	a.radius = b.radius or 80
 	--a.damage = b.damage or 50
 	a.duration = b.duration or 1
