@@ -34,20 +34,26 @@ end
 function checkTransitionEvent(timePass)
 	for i, event in pairs(transitionList) do
 		if event.duration <= event.maxDuration then
+			
+			local tempValue
+			if event.ease == 'linear' then
+				tempValue = (event.final-event.init) *  (event.duration/event.maxDuration) + event.init
+			elseif event.ease == 'sineEaseOut' then
+				tempValue = (event.final-event.init) *  math.sin((event.duration/event.maxDuration)*(math.pi/2)) + event.init
+			elseif event.ease == 'logistic' then
+				local degAccuracy = 8 -- or 5, I guess
+				tempValue = (event.final-event.init) * -1/(1+math.exp(16*event.duration/event.maxDuration-8))
+				print('tempValue: '..tostring(tempValue))
+			end
+
+
+
+
 			if event.category == 'cameraScale' then
 				--print('okay')
 				--uses change bounds, but another function should be made later to change bounds independently of camera
-				changeBounds(((event.final-event.init) *  event.duration/event.maxDuration) + event.init)
+				changeBounds(tempValue)
 			else -- any direct variable not given a specific scenario
-				local tempValue
-				if event.ease == 'linear' then
-					tempValue = (event.final-event.init) *  (event.duration/event.maxDuration) + event.init
-				elseif event.ease == 'sineEaseOut' then
-					tempValue = (event.final-event.init) *  math.sin((event.duration/event.maxDuration)*(math.pi/2)) + event.init
-				elseif event.ease == 'logistic' then
-					local degAccuracy = 8 -- or 5, I guess
-					tempValue = (event.final-event.init) * -1/(1+math.exp(2*degAccuracy*event.duration/event.maxDuration-degAccuracy))
-				end
 				event.table[event.variable] = tempValue
 			end
 

@@ -3,8 +3,8 @@ winX = 640
 winY = 360
 --only if you want maximized window something something
 --winScale = 3
---winScale = 0.5 * math.min(width/winX, height/winY)
-winScale = 1
+winScale = 0.5 * math.min(width/winX, height/winY)
+--winScale = 1
 
 love.window.setMode(winX*winScale,winY*winScale)
 

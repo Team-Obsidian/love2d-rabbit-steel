@@ -458,10 +458,10 @@ function love.keypressed(key, scancode, isrepeat)
 		genTransitionEvent{
 			category='cameraScale',
 			variable='xPos',
-			maxDuration=2,
-			ease='sineEaseOut',
+			maxDuration=1,
+			ease='logistic',
 			init=gameScale,
-			final=1.1
+			final=1.2
 		}
 	end
 
@@ -469,10 +469,10 @@ function love.keypressed(key, scancode, isrepeat)
 		genTransitionEvent{
 			category='cameraScale',
 			variable='xPos',
-			maxDuration=2,
+			maxDuration=1.5,
 			ease='sineEaseOut',
 			init=gameScale,
-			final=1
+			final=0.95
 		}
 	end
 
@@ -481,7 +481,7 @@ function love.keypressed(key, scancode, isrepeat)
 	end
 
 	if key =='4' then
-
+		movePlayersScene(2)
 	end
 
 end
