@@ -19,13 +19,14 @@ end
 
 
 transitionList = {}
-function genTransitionEvent(category, duration, param)
+--print(playerList[1])
+function genTransitionEvent(a)
 	--no timing type besides linear, determine that in the interpreter
-	local a = {}
-	a.category = category
+	--a.category = category
+	--a.duration = 0
 	a.duration = 0
-	a.maxDuration = duration
-	a.param = param
+	--print('table is '..tostring(a.table))
+	--a.param = param
 	table.insert(transitionList, a)
 end
 
@@ -34,36 +35,53 @@ function checkTransitionEvent(timePass)
 	for i, event in pairs(transitionList) do
 		if event.duration <= event.maxDuration then
 			if event.category == 'cameraScale' then
+				--print('okay')
 				--uses change bounds, but another function should be made later to change bounds independently of camera
-				changeBounds(((event.param.final-event.param.init) *  event.duration/event.maxDuration) + event.param.init)
-
-			elseif event.category == 'playerMovement' then
-				--insert player movement cutscene here
-				local tempValueX = (event.param.finalPosX-event.param.initPosX) *  (event.duration/event.maxDuration) + event.param.initPosX
-				local tempValueY = (event.param.finalPosY-event.param.initPosY) *  (event.duration/event.maxDuration) + event.param.initPosY
-				event.param.player.xPos = tempValueX
-				event.param.player.yPos = tempValueY
+				changeBounds(((event.final-event.init) *  event.duration/event.maxDuration) + event.init)
 			else -- any direct variable not given a specific scenario
-				local tempValue = (event.param.final-event.param.init) *  (event.duration/event.maxDuration) + event.param.init
-				print(tempValue)
-				--event.category = tempValue
-				playerList[1].xPos = tempValue
-				--print('event.category is: ' .. event.category)
+				local tempValue
+				if event.ease == 'linear' then
+					tempValue = (event.final-event.init) *  (event.duration/event.maxDuration) + event.init
+				elseif event.ease == 'sineEaseOut' then
+					tempValue = (event.final-event.init) *  math.sin((event.duration/event.maxDuration)*(math.pi/2)) + event.init
+				elseif event.ease == 'logistic' then
+					local degAccuracy = 8 -- or 5, I guess
+					tempValue = (event.final-event.init) * -1/(1+math.exp(2*degAccuracy*event.duration/event.maxDuration-degAccuracy))
+				end
+				event.table[event.variable] = tempValue
 			end
 
 			
 		elseif event.duration > event.maxDuration then
 			if event.category == 'cameraScale' then
-				changeBounds(event.param.final)
+				changeBounds(event.final)
 			else -- any direct variable not given a specific scenario
-				event.category = event.param.final
-				print('time over')
+				--event.category = event.param.final
+				event.table[event.variable] = event.final
+				--print('time over')
 			end
 			
 			transitionList[i] = nil --after everything else is finished
 		end
 
 		event.duration = event.duration + timePass
+	end
+end
+
+instantEvents = {}
+function genInstantEvent(a)
+	a.duration = 0
+	table.insert(instantEvents, a)
+end
+
+function checkInstantEvents(timePass)
+	for i, event in pairs(instantEvents) do
+		if event.duration > event.maxDuration then
+			event.table[event.variable] = event.value
+			instantEvents[i] = nil
+		else
+			event.duration = event.duration + timePass
+		end
 	end
 end
 

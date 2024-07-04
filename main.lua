@@ -16,6 +16,7 @@ function love.load()
 	require('modules/misc')
 
 	require('modules/playerMechanics')
+	require('modules/eventShortcuts')
 
 
 	currentTime = 0
@@ -44,6 +45,8 @@ end
 function love.update(dTime)
 	--currentTime = love.timer.getTime()
 	currentTime = currentTime + dTime
+
+	checkInstantEvents(dTime)
 	checkTransitionEvent(dTime) -- order is arbitrary, maybe sort later
 
 	checkAttackEvents(dTime)
@@ -102,110 +105,111 @@ function love.update(dTime)
 
 
 
+		--print('player.cutscne: '..player.cutscene)
+		if player.cutscene == false then
 
+			--movement
+			local vectorX = 0
+			local vectorY = 0
+			local sqrt2 = math.sqrt(2)
+			--print('player.id: '..player.id)
+			if player.inputDevice == 'keyboard' then
+				--adjust for controllers in future
+				if love.keyboard.isDown('z') and player.globalCD == 0 and player.primaryCD == 0 then
+					playerAttack1{player=player}
+				end
+				if love.keyboard.isDown('x') and player.globalCD == 0 and player.secondaryCD == 0 then
+					playerAttack2{player=player}
+				end
+				if love.keyboard.isDown('v') and player.globalCD == 0 and player.defensiveCD == 0 then
+					playerAttack4{player=player}
+				end
+				--if holding opposite sides, cancel out
+				if love.keyboard.isDown('left') then
+					vectorX = vectorX - 1
+				end
+				if love.keyboard.isDown('right') then
+					vectorX = vectorX + 1
+				end
+				if love.keyboard.isDown('up') then
+					vectorY = vectorY - 1
+				end
+				if love.keyboard.isDown('down') then
+					vectorY = vectorY + 1
+				end
 
-		--movement
-		local vectorX = 0
-		local vectorY = 0
-		local sqrt2 = math.sqrt(2)
-		--print('player.id: '..player.id)
-		if player.inputDevice == 'keyboard' then
-			--adjust for controllers in future
-			if love.keyboard.isDown('z') and player.globalCD == 0 and player.primaryCD == 0 then
-				playerAttack1{player=player}
+				if math.abs(vectorX) == 1 and  math.abs(vectorY) == 1 then 
+					vectorX = 1/sqrt2 * vectorX
+					vectorY = 1/sqrt2 * vectorY
+				end
+
+			elseif player.inputDevice == 'controller' then
+				for i, joystick in ipairs(joystickTable) do
+					if joystick:getID() == player.controllerID then
+						--deadZone could be larger or smaller, multiphase too
+						local deadZoneLow = 0.3
+						local deadZoneHigh = 0.7
+						--6 axis, L2 and R2 are axis 5 and 6
+						
+						if joystick:isGamepadDown('a') and player.globalCD == 0 and player.primaryCD == 0 then
+							playerAttack1{player=player}
+						end
+						if joystick:isGamepadDown('b') and player.globalCD == 0 and player.primaryCD == 0 then
+							playerAttack2{player=player}
+						end
+
+						lstickX = joystick:getAxis(1)
+						lstickY = joystick:getAxis(2)
+						--if holding opposite sides, cancel out
+						if math.abs(lstickX) > deadZoneLow then
+							--arbitrary lower number
+							vectorX = lstickX/math.abs(lstickX)*0.6
+						end
+						if math.abs(lstickX) > deadZoneHigh then
+							vectorX = lstickX/math.abs(lstickX)
+						end
+
+						if math.abs(lstickY) > deadZoneLow then
+							vectorY = lstickY/math.abs(lstickY)*0.6
+						end
+						if math.abs(lstickY) > deadZoneHigh then
+							vectorY = lstickY/math.abs(lstickY)
+						end
+
+					end
+				end
 			end
-			if love.keyboard.isDown('x') and player.globalCD == 0 and player.secondaryCD == 0 then
-				playerAttack2{player=player}
-			end
-			if love.keyboard.isDown('v') and player.globalCD == 0 and player.defensiveCD == 0 then
-				playerAttack4{player=player}
-			end
-			--if holding opposite sides, cancel out
-			if love.keyboard.isDown('left') then
-				vectorX = vectorX - 1
-			end
-			if love.keyboard.isDown('right') then
-				vectorX = vectorX + 1
-			end
-			if love.keyboard.isDown('up') then
-				vectorY = vectorY - 1
-			end
-			if love.keyboard.isDown('down') then
-				vectorY = vectorY + 1
-			end
+
+			--movement code, diagonals move slower, radial movement
+			--very possible to preserve sign more efficiently, todo
+
 
 			if math.abs(vectorX) == 1 and  math.abs(vectorY) == 1 then 
 				vectorX = 1/sqrt2 * vectorX
 				vectorY = 1/sqrt2 * vectorY
 			end
 
-		elseif player.inputDevice == 'controller' then
-			for i, joystick in ipairs(joystickTable) do
-				if joystick:getID() == player.controllerID then
-					--deadZone could be larger or smaller, multiphase too
-					local deadZoneLow = 0.3
-					local deadZoneHigh = 0.7
-					--6 axis, L2 and R2 are axis 5 and 6
-					
-					if joystick:isGamepadDown('a') and player.globalCD == 0 and player.primaryCD == 0 then
-						playerAttack1{player=player}
-					end
-					if joystick:isGamepadDown('b') and player.globalCD == 0 and player.primaryCD == 0 then
-						playerAttack2{player=player}
-					end
-
-					lstickX = joystick:getAxis(1)
-					lstickY = joystick:getAxis(2)
-					--if holding opposite sides, cancel out
-					if math.abs(lstickX) > deadZoneLow then
-						--arbitrary lower number
-						vectorX = lstickX/math.abs(lstickX)*0.6
-					end
-					if math.abs(lstickX) > deadZoneHigh then
-						vectorX = lstickX/math.abs(lstickX)
-					end
-
-					if math.abs(lstickY) > deadZoneLow then
-						vectorY = lstickY/math.abs(lstickY)*0.6
-					end
-					if math.abs(lstickY) > deadZoneHigh then
-						vectorY = lstickY/math.abs(lstickY)
-					end
-
-				end
+			--bounds are currently hardcoded to window, 
+			--should make it dynamic, like rabbit and steel.
+			if player.xPos + player.speed*vectorX*dTime > boundR - boundMargin then
+				player.xPos = boundR - boundMargin
+				vectorX = 0
 			end
-		end
+			if player.xPos + player.speed*vectorX*dTime < boundL + boundMargin then
+				player.xPos = boundL + boundMargin
+				vectorX = 0
+			end
+			if player.yPos + player.speed*vectorY*dTime > boundD - boundMargin then
+				player.yPos = boundD - boundMargin
+				vectorY = 0
+			end
+			if player.yPos + player.speed*vectorY*dTime < boundU + boundMargin then
+				player.yPos = boundU + boundMargin
+				vectorY = 0
+			end
 
-		--movement code, diagonals move slower, radial movement
-		--very possible to preserve sign more efficiently, todo
-
-
-		if math.abs(vectorX) == 1 and  math.abs(vectorY) == 1 then 
-			vectorX = 1/sqrt2 * vectorX
-			vectorY = 1/sqrt2 * vectorY
-		end
-
-		--bounds are currently hardcoded to window, 
-		--should make it dynamic, like rabbit and steel.
-		if player.xPos + player.speed*vectorX*dTime > boundR - boundMargin then
-			player.xPos = boundR - boundMargin
-			vectorX = 0
-		end
-		if player.xPos + player.speed*vectorX*dTime < boundL + boundMargin then
-			player.xPos = boundL + boundMargin
-			vectorX = 0
-		end
-		if player.yPos + player.speed*vectorY*dTime > boundD - boundMargin then
-			player.yPos = boundD - boundMargin
-			vectorY = 0
-		end
-		if player.yPos + player.speed*vectorY*dTime < boundU + boundMargin then
-			player.yPos = boundU + boundMargin
-			vectorY = 0
-		end
-
-		player.xPos = player.xPos + player.speed*vectorX*dTime
-		player.yPos = player.yPos + player.speed*vectorY*dTime
+			player.xPos = player.xPos + player.speed*vectorX*dTime
+			player.yPos = player.yPos + player.speed*vectorY*dTime
 
 
 		--[[
@@ -216,7 +220,7 @@ function love.update(dTime)
 		})
 		-]]
 
-
+		end
 	end
 
 end
@@ -451,44 +455,32 @@ function love.keypressed(key, scancode, isrepeat)
 	end
 
 	if key =='1' then
-		genTransitionEvent('cameraScale',2,{
+		genTransitionEvent{
+			category='cameraScale',
+			variable='xPos',
+			maxDuration=2,
+			ease='sineEaseOut',
 			init=gameScale,
-			final=0.5
-		})
+			final=1.1
+		}
 	end
 
 	if key == '2' then
-		genTransitionEvent('cameraScale',2,{
+		genTransitionEvent{
+			category='cameraScale',
+			variable='xPos',
+			maxDuration=2,
+			ease='sineEaseOut',
 			init=gameScale,
-			final=1.5
-		})
+			final=1
+		}
 	end
 
 	if key == '3' then
+		movePlayers(0,0,1.5)
+	end
 
-		--[[
-		genTransitionEvent(playerList[1].xPos,2,{
-			init=playerList[1].xPos,
-			--init=50,
-			final=0
-		})
-		--]]
-
-		genTransitionEvent('playerMovement',2,{
-			player=playerList[1],
-			initPosX=playerList[1].xPos,
-			initPosY=playerList[1].yPos,
-			finalPosX=0,
-			finalPosY=0,
-		})
-
-		genTransitionEvent('xPos',2,{
-			table=playerList[1],
-			initPosX=playerList[1].xPos,
-			initPosY=playerList[1].yPos,
-			finalPosX=0,
-			finalPosY=0,
-		})
+	if key =='4' then
 
 	end
 

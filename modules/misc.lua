@@ -68,11 +68,13 @@ boundD = winCamY/2
 boundMargin = 10
 
 function changeBounds(scale)
+	--print('ran')
 	gameScale = scale
 	winCamX = 640 * gameScale
 	winCamY = 360 * gameScale
 
 	boundL = -winCamX/2
+	--print('bound L is '..tostring(boundL))
 	boundR = winCamX/2
 	boundU = -winCamY/2
 	boundD = winCamY/2
@@ -80,7 +82,7 @@ function changeBounds(scale)
 	--benefits greatly from using some timing function...
 
 end
-changeBounds(1.5)
+--changeBounds(1.5)
 
 function checkBulletClear(attack)
 	-- insta-clears bullets, later should be put in a delete list so animations can still play

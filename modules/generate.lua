@@ -14,9 +14,9 @@ function genPlayer(b)
 
 	--effects
     a.rotate = b.rotate or 0
-    a.skewX = b.skewX or 0
-    a.skewY = b.skewY or 0
-    a.opacity = b.opacity or 1
+    --a.skewX = b.skewX or 0
+    --a.skewY = b.skewY or 0
+    --a.opacity = b.opacity or 1
 
     --battle attributes
     a.hitable = b.hitable or true
@@ -39,9 +39,12 @@ function genPlayer(b)
     a.maxHealth = 5
     a.health = a.maxHealth
 
+
+    --controller status
     a.inputDevice = b.inputDevice
     a.controllerID = b.controllerID
 
+    --cosmetics
     a.color = b.color or 'yellow'
 
     --arbitrary 4 player limit
@@ -51,6 +54,9 @@ function genPlayer(b)
     		break
     	end
     end
+
+    --control state (can attack, in cutscene, etc.)
+    a.cutscene = b.cutscene or false
 
     -- auto-insert into table
     if a.id == nil then print('trying to add more than 4 players') else 
