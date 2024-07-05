@@ -342,6 +342,20 @@ function love.draw()
 			local d = attack.param.angle or 0
 			local diagonal = (math.sqrt(winCamX^2+winCamY^2))
 			love.graphics.line(a, b, math.cos(d)*diagonal + a, math.sin(d)*diagonal + b)
+		elseif attack.param.shape == 'laser' then
+			local a = attack.param.xPos
+			local b = attack.param.yPos
+			local c = attack.param.width or 10
+			local d = attack.param.angle or 0
+			love.graphics.setColor(1, 1, 0, 0.3)
+			love.graphics.setLineWidth(c)
+			love.graphics.line(a, b, a + math.cos(d)*winCamX, b + math.sin(d)*winCamY)
+
+			love.graphics.setColor(1, 1, 0, 0.3) -- back side of laser
+			love.graphics.line(attack.param.xPos - math.cos(attack.param.angle)*winCamX, attack.param.yPos - math.sin(attack.param.angle)*winCamY,
+				attack.param.xPos + math.cos(attack.param.angle)*winCamX, attack.param.yPos + math.sin(attack.param.angle)*winCamY)
+
+			love.graphics.setLineWidth(1)
 		end
 	end
 
@@ -358,8 +372,18 @@ function love.draw()
 				love.graphics.setColor(1, 0.5,0.5, 1.0)
 				love.graphics.circle('line', attack.xPos, attack.yPos, attack.radius)				
 			end
-		elseif attack.shape == 'side' then
-			--todo: insert graphics for side aoe attacks here
+		elseif attack.shape == 'laser' then
+			--print('okay')
+			love.graphics.setColor(1, 1, 0, 0.5)
+			print()
+			--love.graphics.setLineWidth(attack.width/5)
+			love.graphics.line(attack.xPos, attack.yPos, attack.xPos + math.cos(attack.angle)*winCamX, attack.yPos + math.sin(attack.angle)*winCamY)
+			love.graphics.setColor(1, 1, 0, 0.4)
+			--love.graphics.line(attack.xPos - math.cos(attack.angle)*winCamX, attack.yPos - math.sin(attack.angle)*winCamY,
+			--	attack.xPos + math.cos(attack.angle)*winCamX, attack.yPos + math.sin(attack.angle)*winCamY)
+			love.graphics.setLineWidth(1)
+			--print('attack.xPos '..tostring(attack.xPos))
+			--love.graphics.line(attack.xPos, attack.yPos, 0, 0)
 		end
 	end
 
@@ -459,7 +483,7 @@ function love.keypressed(key, scancode, isrepeat)
 			category='cameraScale',
 			variable='xPos',
 			maxDuration=1,
-			ease='logistic',
+			ease='sineEaseOut',
 			init=gameScale,
 			final=1.2
 		}
@@ -482,6 +506,14 @@ function love.keypressed(key, scancode, isrepeat)
 
 	if key =='4' then
 		movePlayersScene(2)
+	end
+
+	if key == '5' then
+		initEnemyAttack4(2.5,50,20)
+	end
+
+	if key == '6' then
+		initEnemyAttack5(2.5,50,5)
 	end
 
 end

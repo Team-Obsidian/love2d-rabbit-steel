@@ -119,6 +119,54 @@ function enemyAttack2(b)
 	playSound(sfx.attack1, 'cut')
 end
 
+--big laser, dragon
+function enemyAttack3(b)
+	local a = {}
+	a.name = 'enemyAttack3'
+	a.shape = b.shape or 'laser'
+	a.xPos = b.xPos
+	a.yPos = b.yPos
+	a.width = b.width or 20
+	a.duration = b.duration or 0.5
+	a.angle = b.angle or 0
+	a.owner = 'enemy'
+	a.enemy = b.enemy
+	table.insert(aoeAttacks,a)
+	playSound(sfx.attack1, 'cut')
+end
+
+--horizontal laser on player
+--single-sided lasers only
+function initEnemyAttack4(wait,size,duration)
+	local randEnemy = enemyList[math.random(1, objNumber(enemyList))]
+	local randPlayer = playerList[math.random(1, objNumber(playerList))]
+	genAttackEvent('enemyAtk3',wait,{
+		xPos=boundL,
+		yPos=randPlayer.yPos,
+		width=size,
+		shape='laser',
+		enemy=randEnemy,
+		angle=0,
+		duration=duration
+	})
+end
+
+function initEnemyAttack5(wait,size,duration)
+	--local randEnemy = enemyList[math.random(1, objNumber(enemyList))]
+	local randEnemy = enemyList[1]
+	local randPlayer = playerList[math.random(1, objNumber(playerList))]
+	genAttackEvent('enemyAtk3',wait,{
+		xPos=randEnemy.xPos,
+		yPos=randEnemy.yPos,
+		width=size,
+		shape='laser',
+		enemy=randEnemy,
+		angle= compassPoint(randEnemy, randPlayer).angle,
+		duration=duration
+	})
+end
+
+
 function initEnemyAttack2(bulletNum, b)
 	for i=1, bulletNum do
 		local interval = 0.2
@@ -129,7 +177,6 @@ function initEnemyAttack2(bulletNum, b)
 				shape='bullet',
 				owner='enemy',
 				angle=math.pi/6,
-				id=1
 			})
 		else
 			genAttackEvent('enemyAtk2',interval*i,b)			

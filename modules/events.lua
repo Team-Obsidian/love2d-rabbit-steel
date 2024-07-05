@@ -41,9 +41,10 @@ function checkTransitionEvent(timePass)
 			elseif event.ease == 'sineEaseOut' then
 				tempValue = (event.final-event.init) *  math.sin((event.duration/event.maxDuration)*(math.pi/2)) + event.init
 			elseif event.ease == 'logistic' then
+				--for some reason, only works on character movement and not camera
 				local degAccuracy = 8 -- or 5, I guess
-				tempValue = (event.final-event.init) * -1/(1+math.exp(16*event.duration/event.maxDuration-8))
-				print('tempValue: '..tostring(tempValue))
+				tempValue = (event.final-event.init) /-(1+math.exp(degAccuracy*2*event.duration/event.maxDuration-degAccuracy)) 
+				print('gameScale: '..tostring(gameScale))
 			end
 
 
@@ -105,6 +106,8 @@ function checkAttackEvents(timePass)
 			elseif event.category == 'enemyAtk2' then
 				--print('ooookie')
 				enemyAttack2(event.param)
+			elseif event.category == 'enemyAtk3' then
+				enemyAttack3(event.param)
 			end
 			attackList[i] = nil
 		else
@@ -201,8 +204,40 @@ function checkAttacks(category, timePass)
 						end
 					end
 				end
-			elseif attack.shape == 'side' then
-				--todo later
+			elseif attack.shape == 'laser' then
+				print('attack.duration '.. tostring(attack.duration))
+				if attack.owner == 'enemy' then
+					for i, player in pairs(playerList) do
+						local lengthX = player.xPos-attack.xPos
+						local lengthY = player.yPos-attack.yPos
+						local hypotenuse = math.sin(attack.angle)*lengthX
+						local longY = math.tan(attack.angle)*lengthX
+						local distBetween = math.cos(attack.angle)*(longY-lengthY)
+
+						print('lengthX '.. lengthX)
+						print('hypotenuse '.. hypotenuse)
+						print('longY '.. longY)
+						print('distBetween '.. distBetween)
+
+						print('angle is '..tostring(attack.angle/math.pi*180))
+
+						if math.abs(distBetween) < attack.width/2 + player.radius then
+							print('made contact')
+						else
+							print('did not make contact')
+						end
+
+						--math.compassPoint(attack, player,0).angle
+						--check circular collision
+
+
+
+						--if collideCircle(player, attack) and player.hitable then
+						--	playerHit(player)
+						--end
+					end
+				elseif attack.owner == 'player' then
+				end
 			end
 		else
 			category[i] = nil
