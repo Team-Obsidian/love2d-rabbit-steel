@@ -349,12 +349,13 @@ function love.draw()
 			local d = attack.param.angle or 0
 			love.graphics.setColor(1, 1, 0, 0.3)
 			love.graphics.setLineWidth(c)
-			love.graphics.line(a, b, a + math.cos(d)*winCamX, b + math.sin(d)*winCamY)
 
-			love.graphics.setColor(1, 1, 0, 0.3) -- back side of laser
-			love.graphics.line(attack.param.xPos - math.cos(attack.param.angle)*winCamX, attack.param.yPos - math.sin(attack.param.angle)*winCamY,
-				attack.param.xPos + math.cos(attack.param.angle)*winCamX, attack.param.yPos + math.sin(attack.param.angle)*winCamY)
-
+			if attack.param.version == 'single' then
+				love.graphics.line(a, b, a + math.cos(d)*winCamX, b + math.sin(d)*winCamY)
+			elseif attack.param.version == 'double' then
+				love.graphics.line(attack.param.xPos - math.cos(attack.param.angle)*winCamX, attack.param.yPos - math.sin(attack.param.angle)*winCamY,
+					attack.param.xPos + math.cos(attack.param.angle)*winCamX, attack.param.yPos + math.sin(attack.param.angle)*winCamY)
+			end
 			love.graphics.setLineWidth(1)
 		end
 	end
@@ -375,12 +376,15 @@ function love.draw()
 		elseif attack.shape == 'laser' then
 			--print('okay')
 			love.graphics.setColor(1, 1, 0, 0.5)
-			print()
-			--love.graphics.setLineWidth(attack.width/5)
-			love.graphics.line(attack.xPos, attack.yPos, attack.xPos + math.cos(attack.angle)*winCamX, attack.yPos + math.sin(attack.angle)*winCamY)
-			love.graphics.setColor(1, 1, 0, 0.4)
-			--love.graphics.line(attack.xPos - math.cos(attack.angle)*winCamX, attack.yPos - math.sin(attack.angle)*winCamY,
-			--	attack.xPos + math.cos(attack.angle)*winCamX, attack.yPos + math.sin(attack.angle)*winCamY)
+			love.graphics.setLineWidth(attack.width)
+			if attack.version == 'single' then
+				love.graphics.line(attack.xPos, attack.yPos, attack.xPos + math.cos(attack.angle)*winCamX, attack.yPos + math.sin(attack.angle)*winCamY)
+			elseif attack.version == 'double' then
+				love.graphics.line(attack.xPos - math.cos(attack.angle)*winCamX, attack.yPos - math.sin(attack.angle)*winCamY,
+					attack.xPos + math.cos(attack.angle)*winCamX, attack.yPos + math.sin(attack.angle)*winCamY)
+			else
+				print('weird laser')
+			end
 			love.graphics.setLineWidth(1)
 			--print('attack.xPos '..tostring(attack.xPos))
 			--love.graphics.line(attack.xPos, attack.yPos, 0, 0)
@@ -513,7 +517,7 @@ function love.keypressed(key, scancode, isrepeat)
 	end
 
 	if key == '6' then
-		initEnemyAttack5(2.5,50,5)
+		initEnemyAttack5(2.5,50,10)
 	end
 
 end

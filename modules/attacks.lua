@@ -129,8 +129,10 @@ function enemyAttack3(b)
 	a.width = b.width or 20
 	a.duration = b.duration or 0.5
 	a.angle = b.angle or 0
+	a.version = b.version or 'single'
 	a.owner = 'enemy'
 	a.enemy = b.enemy
+	a.rotateRate = b.rotateRate or 0
 	table.insert(aoeAttacks,a)
 	playSound(sfx.attack1, 'cut')
 end
@@ -145,6 +147,7 @@ function initEnemyAttack4(wait,size,duration)
 		yPos=randPlayer.yPos,
 		width=size,
 		shape='laser',
+		version='double',
 		enemy=randEnemy,
 		angle=0,
 		duration=duration
@@ -160,9 +163,11 @@ function initEnemyAttack5(wait,size,duration)
 		yPos=randEnemy.yPos,
 		width=size,
 		shape='laser',
+		version='single',
 		enemy=randEnemy,
-		angle= compassPoint(randEnemy, randPlayer).angle,
-		duration=duration
+		angle= math.pi,--compassPoint(randEnemy, randPlayer).angle,
+		duration=duration,
+		rotateRate = 0.1
 	})
 end
 

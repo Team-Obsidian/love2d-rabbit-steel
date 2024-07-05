@@ -205,7 +205,9 @@ function checkAttacks(category, timePass)
 					end
 				end
 			elseif attack.shape == 'laser' then
-				print('attack.duration '.. tostring(attack.duration))
+
+
+
 				if attack.owner == 'enemy' then
 					for i, player in pairs(playerList) do
 						local lengthX = player.xPos-attack.xPos
@@ -214,30 +216,28 @@ function checkAttacks(category, timePass)
 						local longY = math.tan(attack.angle)*lengthX
 						local distBetween = math.cos(attack.angle)*(longY-lengthY)
 
+						--[[
 						print('lengthX '.. lengthX)
 						print('hypotenuse '.. hypotenuse)
 						print('longY '.. longY)
 						print('distBetween '.. distBetween)
 
 						print('angle is '..tostring(attack.angle/math.pi*180))
+						--]]
 
-						if math.abs(distBetween) < attack.width/2 + player.radius then
-							print('made contact')
+
+						if math.abs(distBetween) < attack.width/2 + player.radius and player.hitable then
+							if (attack.version == 'single' and lengthX*math.cos(attack.angle)>0) or attack.version == 'double' then
+								playerHit(player)
+							end
 						else
-							print('did not make contact')
+							--print('did not make contact')
 						end
-
-						--math.compassPoint(attack, player,0).angle
-						--check circular collision
-
-
-
-						--if collideCircle(player, attack) and player.hitable then
-						--	playerHit(player)
-						--end
 					end
 				elseif attack.owner == 'player' then
 				end
+
+				attack.angle = attack.rotateRate*2*math.pi*timePass + attack.angle
 			end
 		else
 			category[i] = nil
